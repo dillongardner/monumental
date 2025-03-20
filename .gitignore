@@ -1,0 +1,30 @@
+    # Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Python caches
+.mypy_cache
+.pytest_cache
+.ruff_cache
+
+# Node.js
+frontend/node_modules/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/.vercel
+frontend/.env*.local
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
