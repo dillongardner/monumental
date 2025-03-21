@@ -9,7 +9,7 @@ export default function Home() {
         <div>
             <h1>Crane Simulator</h1>
             <Controls sendCommand={(cmd) => {/* WebSocket send logic */}} />
-            <Crane state={craneState} />
+            <Crane craneState={craneState} />
         </div>
     );
 }

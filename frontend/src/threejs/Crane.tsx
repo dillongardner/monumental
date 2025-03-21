@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useControls } from "leva"; // For debugging movements
+import React from 'react';
 
 // Crane dimensions
 const DIMENSIONS = {
@@ -40,7 +41,12 @@ const DIMENSIONS = {
 // Add this constant at the top with other constants
 const GLOBAL_SCALE = 8;
 
-const Crane = () => {
+// Define the props interface
+interface CraneProps {
+    craneState: any; // Change 'state' to 'craneState'
+}
+
+const Crane: React.FC<CraneProps> = ({ craneState }) => {
     // Control states
     const { swing, lift, elbow, wrist, gripper } = useControls({
         lift: { value: 1, min: 0.0, max: 3 - DIMENSIONS.elbow.height }, // Simulating height in meters
@@ -105,7 +111,7 @@ const Crane = () => {
     );
 };
 
-export default function Scene() {
+export default function Scene({ craneState }) {
     return (
         <div style={{ width: '100%', height: '100vh' }}>
             <Canvas camera={{ 
@@ -116,7 +122,7 @@ export default function Scene() {
             }}>
                 <ambientLight />
                 <directionalLight position={[8, 20, 8]} />  {/* Adjusted for the new scale */}
-                <Crane />
+                <Crane craneState={craneState} />
             </Canvas>
         </div>
     );
