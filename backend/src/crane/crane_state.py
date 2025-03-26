@@ -2,10 +2,10 @@ from dataclasses import dataclass
 
 @dataclass
 class CraneState:
-    swing_rotation: float  # degrees
-    lift_elevation: float  # mm
-    elbow_rotation: float  # degrees
-    wrist_rotation: float  # degrees
+    swing: float  # degrees
+    lift: float  # mm
+    elbow: float  # degrees
+    wrist: float  # degrees
     gripper: float  # mm (open/close)
 
     def update_state(self, new_state: dict):

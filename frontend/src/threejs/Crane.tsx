@@ -43,18 +43,19 @@ const GLOBAL_SCALE = 8;
 
 // Define the props interface
 interface CraneProps {
-    craneState: any; // Change 'state' to 'craneState'
+    craneState: {
+        lift: number;
+        swing: number;
+        elbow: number;
+        wrist: number;
+        gripper: number;
+    };
 }
 
 const Crane: React.FC<CraneProps> = ({ craneState }) => {
+    // Destructure values from craneState, providing default values if craneState is null
+    const { swing = 0, lift = 1, elbow = 0, wrist = 0, gripper = 0 } = craneState || {};
     // Control states
-    const { swing, lift, elbow, wrist, gripper } = useControls({
-        lift: { value: 1, min: 0.0, max: 3 - DIMENSIONS.elbow.height }, // Simulating height in meters
-        swing: { value: 0, min: -180, max: 180 },
-        elbow: { value: 0, min: -90, max: 90 },
-        wrist: { value: 0, min: -90, max: 90 },
-        gripper: { value: 0, min: 0, max: 0.5 }, // Simulating opening range
-    });
 
     return (
         <group position={[0, 0, 0]} scale={GLOBAL_SCALE}>

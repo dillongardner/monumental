@@ -4,10 +4,10 @@ class MotionController:
     def __init__(self, state):
         self.state = state
         self.max_speeds = {
-            "swing_rotation": 10,  # degrees/sec
-            "lift_elevation": 50,  # mm/sec
-            "elbow_rotation": 15,  # degrees/sec
-            "wrist_rotation": 20,  # degrees/sec
+            "swing": 10,  # degrees/sec
+            "lift": 50,  # mm/sec
+            "elbow": 15,  # degrees/sec
+            "wrist": 20,  # degrees/sec
             "gripper": 5  # mm/sec
         }
 
