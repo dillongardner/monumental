@@ -2,9 +2,14 @@ import { useEffect, useState } from "react";
 
 export default function useWebSocket() {
     const [craneState, setCraneState] = useState(null);
+    const [ws, setWs] = useState(null);
+
     useEffect(() => {
-        const ws = new WebSocket("ws://localhost:8000/ws");
-        ws.onmessage = (event) => {
+        const wsConnection = new WebSocket("ws://localhost:8000/ws");
+        setWs(wsConnection);
+        
+        wsConnection.onmessage = (event) => {
+            console.log("Received message:", event.data);
             try {
                 const data = JSON.parse(event.data);
                 
@@ -24,7 +29,18 @@ export default function useWebSocket() {
                 console.error("Error parsing JSON:", error);
             }
         };
-        return () => ws.close();
+        
+        return () => wsConnection.close();
     }, []);
-    return { craneState };
+
+    const sendCommand = (values) => {
+        console.log("Sending command:", values);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+                target: values
+            }));
+        }
+    };
+
+    return { craneState, sendCommand };
 }
