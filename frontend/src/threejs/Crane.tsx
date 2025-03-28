@@ -44,6 +44,7 @@ interface CraneDimensions {
 }
 
 // Default dimensions
+// TODO these should be received from the backend
 const DEFAULT_DIMENSIONS: CraneDimensions = {
     base: {
         radius: 0.5,

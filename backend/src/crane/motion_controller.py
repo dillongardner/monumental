@@ -1,5 +1,5 @@
 import asyncio
-from crane.crane_state import CraneState
+from crane.crane import CraneState, Crane
 from typing import Callable, Awaitable, Optional
 
 import logging
@@ -8,26 +8,31 @@ logger = logging.getLogger(__name__)
 
 
 class MotionController:
-    def __init__(self, state: CraneState):
+    def __init__(self, state: CraneState, crane: Crane):
         self.state = state
         self.max_speeds = {
             "swing": 10,  # degrees/sec
-            "lift": 0.05,  # mm/sec
+            "lift": 0.5,  # mm/sec
             "elbow": 15,  # degrees/sec
             "wrist": 20,  # degrees/sec
             "gripper": 5,  # mm/sec
         }
+        self.crane = crane
 
     async def apply_motion(
         self,
         target_state: CraneState,
-        max_duration: float = 10.0,
+        max_duration: float = 30.0,
         on_update: Optional[Callable[[CraneState], Awaitable[None]]] = None,
     ):
         """Smoothly transitions to target state over a duration asynchronously."""
+        if not self.crane.is_valid_state(target_state):
+            logger.error("Invalid target state")
+            return
         start_time = asyncio.get_event_loop().time()
 
         while asyncio.get_event_loop().time() - start_time < max_duration:
+            # TODO: as there are no guarantees on the time to regain control, we should calculate the time for each step explicitly
             for key in self.max_speeds:
                 step = self.max_speeds[key] * 0.1  # Adjust per tick
                 current = getattr(self.state, key)
@@ -42,15 +47,18 @@ class MotionController:
                         key,
                         current + step if target > current else current - step,
                     )
+                else:
+                    setattr(
+                        self.state,
+                        key,
+                        target
+                    )
 
             if on_update:
                 await on_update(self.state)
             # Check if we've reached the target state
-            if all(
-                abs(getattr(self.state, key) - getattr(target_state, key))
-                < self.max_speeds[key] * 0.1
-                for key in self.max_speeds
+            if all(getattr(self.state, key)  == getattr(target_state, key) for key in self.max_speeds
             ):
-                logger.debug("Reached target state")
+                logger.info("Reached target state")
                 break
-            await asyncio.sleep(0.1)  # Non-blocking sleep
+            await asyncio.sleep(0.1)

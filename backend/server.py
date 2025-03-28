@@ -1,5 +1,5 @@
 from fastapi import FastAPI, WebSocket
-from crane.crane_state import CraneState
+from crane.crane import CraneState, Crane
 from crane.motion_controller import MotionController
 import logging
 import sys
@@ -17,7 +17,8 @@ logger.setLevel(logging.DEBUG)
 
 app = FastAPI()
 initial_state = CraneState(0, 1, 0, 0, 0)
-controller = MotionController(initial_state)
+crane = Crane()
+controller = MotionController(initial_state, crane)
 
 
 @app.websocket("/ws")
@@ -42,6 +43,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 async def send_update(state):
                     logger.debug(f"State update: {state.__dict__}")
+                    logger.debug(f"Target state: {target_state.__dict__}")
                     await websocket.send_json(state.__dict__)
 
                 await controller.apply_motion(target_state, on_update=send_update)
