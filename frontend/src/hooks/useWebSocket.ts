@@ -1,19 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { WebSocketMessage, CraneStateTarget } from "../types/messages";
+
+const DEFAULT_CRANE_STATE: CraneStateTarget = {
+    swing: 0,
+    lift: 1,
+    elbow: 0,
+    wrist: 0,
+    gripper: 0
+};
 
 export default function useWebSocket() {
-    const [craneState, setCraneState] = useState(null);
-    const [ws, setWs] = useState(null);
+    const [craneState, setCraneState] = useState<CraneStateTarget>(DEFAULT_CRANE_STATE);
+    const wsRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        const wsConnection = new WebSocket("ws://localhost:8000/ws");
-        setWs(wsConnection);
+        wsRef.current = new WebSocket("ws://localhost:8000/ws");
         
-        wsConnection.onmessage = (event) => {
+        wsRef.current.onmessage = (event) => {
             console.log("Received message:", event.data);
             try {
                 const data = JSON.parse(event.data);
                 
-                // Basic validation (you can expand this as needed)
+                // Validate the received data matches our CraneStateTarget type
                 if (
                     typeof data.lift === 'number' &&
                     typeof data.swing === 'number' &&
@@ -30,15 +38,15 @@ export default function useWebSocket() {
             }
         };
         
-        return () => wsConnection.close();
+        return () => {
+            wsRef.current?.close();
+        };
     }, []);
 
-    const sendCommand = (values) => {
-        console.log("Sending command:", values);
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({
-                target: values
-            }));
+    const sendCommand = (message: WebSocketMessage) => {
+        console.log("Sending command:", message);
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify(message));
         }
     };
 

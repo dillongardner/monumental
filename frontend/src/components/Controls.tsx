@@ -1,7 +1,12 @@
 import React from 'react';
+import { CraneStateMessage, CraneStateTarget } from '../types/messages';
 
-export default function Controls({ sendCommand }) {
-    const [values, setValues] = React.useState({
+interface ControlsProps {
+    sendCommand: (message: CraneStateMessage) => void;
+}
+
+export default function Controls({ sendCommand }: ControlsProps) {
+    const [values, setValues] = React.useState<CraneStateTarget>({
         swing: 0,
         lift: 1,
         elbow: 0,
@@ -10,16 +15,19 @@ export default function Controls({ sendCommand }) {
     });
     
     // Keep track of previous state for reset functionality
-    const [previousValues, setPreviousValues] = React.useState({...values});
+    const [previousValues, setPreviousValues] = React.useState<CraneStateTarget>({...values});
 
-    const handleChange = (key, value, parser) => {
+    const handleChange = (key: keyof CraneStateTarget, value: string, parser: (value: string) => number) => {
         const parsedValue = parser(value);
         setValues(prev => ({ ...prev, [key]: parsedValue }));
     };
 
     const handleSend = () => {
         setPreviousValues({...values});
-        sendCommand(values);
+        sendCommand({
+            type: 'crane_state',
+            target: values
+        });
     };
 
     const handleReset = () => {

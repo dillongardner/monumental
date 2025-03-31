@@ -1,0 +1,31 @@
+export type MessageType = 'crane_state' | 'xyz_position';
+
+export interface BaseMessage {
+    type: MessageType;
+}
+
+export interface CraneStateTarget {
+    swing: number;
+    lift: number;
+    elbow: number;
+    wrist: number;
+    gripper: number;
+}
+
+export interface XYZPositionTarget {
+    x: number;
+    y: number;
+    z: number;
+}
+
+export interface CraneStateMessage extends BaseMessage {
+    type: 'crane_state';
+    target: CraneStateTarget;
+}
+
+export interface XYZPositionMessage extends BaseMessage {
+    type: 'xyz_position';
+    target: XYZPositionTarget;
+}
+
+export type WebSocketMessage = CraneStateMessage | XYZPositionMessage; 
