@@ -1,6 +1,7 @@
 from fastapi import FastAPI, WebSocket
 from crane.crane import CraneState, Crane
 from crane.motion_controller import MotionController
+from crane.messages import MessageType, CraneStateMessage, XYZPositionMessage
 import logging
 import sys
 from typing import Dict, Any, Union
@@ -18,32 +19,6 @@ logger = logging.getLogger(__name__)
 # Ensure our logger's level is set to DEBUG
 logger.setLevel(logging.DEBUG)
 
-class MessageType(str, Enum):
-    CRANE_STATE = "crane_state"
-    XYZ_POSITION = "xyz_position"
-
-class BaseMessage(BaseModel):
-    type: MessageType
-
-class CraneStateTarget(BaseModel):
-    swing: float
-    lift: float
-    elbow: float
-    wrist: float
-    gripper: float
-
-class XYZPositionTarget(BaseModel):
-    x: float
-    y: float
-    z: float
-
-class CraneStateMessage(BaseMessage):
-    type: MessageType = MessageType.CRANE_STATE
-    target: CraneStateTarget
-
-class XYZPositionMessage(BaseMessage):
-    type: MessageType = MessageType.XYZ_POSITION
-    target: XYZPositionTarget
 
 app = FastAPI()
 initial_state = CraneState(0, 1, 0, 0, 0)
