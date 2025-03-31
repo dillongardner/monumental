@@ -138,7 +138,8 @@ const Crane: React.FC<CraneProps> = ({ craneState, dimensions = DEFAULT_DIMENSIO
 
                     {/* Wrist - now rotates around its own axis */}
                     <group 
-                        position={[dimensions.elbow.width, -dimensions.upperArm.height, 0]} // Position at the end of the upper arm
+                        position={[dimensions.elbow.width, -dimensions.upperArm.height, 0]}  // Position at the end of the upper arm
+                        rotation={[0, wrist * (Math.PI / 180), 0]}
                     >
                         <group rotation={[0, elbow * (Math.PI / 180), 0]}> {/* Rotate wrist independently */}
                             <mesh position={[dimensions.wrist.width / 2, 0, 0]}>
@@ -147,12 +148,12 @@ const Crane: React.FC<CraneProps> = ({ craneState, dimensions = DEFAULT_DIMENSIO
                             </mesh>
 
                             {/* Hand */}
-                            <mesh position={[dimensions.wrist.width - dimensions.lowerArm.radius, -dimensions.lowerArm.height/2, 0]}>
+                            <mesh position={[dimensions.wrist.width , -dimensions.lowerArm.height/2, 0]}>
                                 <cylinderGeometry args={[dimensions.lowerArm.radius, dimensions.lowerArm.radius, dimensions.lowerArm.height, dimensions.lowerArm.segments]} />
                                 <meshStandardMaterial color="lightgray" />
                             </mesh>
                             {/* Wrist rotation */}
-                            <group position={[dimensions.wrist.width, -dimensions.lowerArm.height, 0]} rotation={[0, wrist * (Math.PI / 180), 0]}>
+                            <group position={[dimensions.wrist.width, -dimensions.lowerArm.height, 0]}>
                                 {/* Gripper */}
                                 <mesh position={[dimensions.lowerArm.radius + gripper/2, 0 , 0]}>
                                     <boxGeometry args={[dimensions.gripper.width + gripper, dimensions.gripper.height, dimensions.gripper.depth]} />
