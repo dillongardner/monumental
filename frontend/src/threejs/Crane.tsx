@@ -139,9 +139,9 @@ const Crane: React.FC<CraneProps> = ({ craneState, dimensions = DEFAULT_DIMENSIO
                     {/* Wrist - now rotates around its own axis */}
                     <group 
                         position={[dimensions.elbow.width, -dimensions.upperArm.height, 0]}  // Position at the end of the upper arm
-                        rotation={[0, wrist * (Math.PI / 180), 0]}
+                        rotation={[0, elbow * (Math.PI / 180), 0]}
                     >
-                        <group rotation={[0, elbow * (Math.PI / 180), 0]}> {/* Rotate wrist independently */}
+                        
                             <mesh position={[dimensions.wrist.width / 2, 0, 0]}>
                                 <boxGeometry args={[dimensions.wrist.width, dimensions.wrist.height, dimensions.wrist.depth]} />
                                 <meshStandardMaterial color="red" />
@@ -153,14 +153,14 @@ const Crane: React.FC<CraneProps> = ({ craneState, dimensions = DEFAULT_DIMENSIO
                                 <meshStandardMaterial color="lightgray" />
                             </mesh>
                             {/* Wrist rotation */}
-                            <group position={[dimensions.wrist.width, -dimensions.lowerArm.height, 0]}>
+                            <group position={[dimensions.wrist.width, -dimensions.lowerArm.height, 0]}
+                            rotation={[0, wrist * (Math.PI / 180), 0]}>
                                 {/* Gripper */}
                                 <mesh position={[dimensions.lowerArm.radius + gripper/2, 0 , 0]}>
                                     <boxGeometry args={[dimensions.gripper.width + gripper, dimensions.gripper.height, dimensions.gripper.depth]} />
                                     <meshStandardMaterial color="yellow" />
                                 </mesh>
                             </group>
-                        </group>
                     </group>
                 </group>
             </group>
