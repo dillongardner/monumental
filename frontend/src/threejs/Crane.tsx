@@ -3,6 +3,8 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useControls } from "leva"; // For debugging movements
 import React from 'react';
+import { CraneOrientation, CraneState } from '../types/crane';
+import { Text } from '@react-three/drei';
 
 // Define the dimensions interface
 interface CraneDimensions {
@@ -89,28 +91,22 @@ const GLOBAL_SCALE = 8;
 // Define the props interface
 interface CraneProps {
     craneState: CraneState;
+    orientation: CraneOrientation;
     dimensions?: CraneDimensions;
-}
-
-interface CraneState {
-    lift: number;
-    swing: number;
-    elbow: number;
-    wrist: number;
-    gripper: number;
 }
 
 interface SceneProps {
     craneState: CraneState;
+    orientation: CraneOrientation;
     dimensions?: CraneDimensions;
 }
 
-const Crane: React.FC<CraneProps> = ({ craneState, dimensions = DEFAULT_DIMENSIONS }) => {
+const Crane: React.FC<CraneProps> = ({ craneState, orientation, dimensions = DEFAULT_DIMENSIONS }) => {
     // Destructure values from craneState, providing default values if craneState is null
     const { swing, lift, elbow, wrist, gripper} = craneState;
 
     return (
-        <group position={[0, 0, 0]} scale={GLOBAL_SCALE}>
+        <group position={[orientation.x, orientation.y, orientation.z]} rotation={[0, 0, orientation.rotationZ * (Math.PI / 180)]} scale={GLOBAL_SCALE}>
             <mesh position={[0, dimensions.base.height / 2, 0]}>
                 <cylinderGeometry args={[dimensions.base.radius, dimensions.base.radius, dimensions.base.height, dimensions.base.segments]} />
                 <meshStandardMaterial color="gray" transparent opacity={0.5} />
@@ -168,7 +164,7 @@ const Crane: React.FC<CraneProps> = ({ craneState, dimensions = DEFAULT_DIMENSIO
     );
 };
 
-export default function Scene({ craneState, dimensions }: SceneProps) {
+export default function Scene({ craneState, orientation, dimensions }: SceneProps) {
     return (
         <div style={{ width: '100%', height: '100vh' }}>
             <Canvas camera={{ 
@@ -179,7 +175,21 @@ export default function Scene({ craneState, dimensions }: SceneProps) {
             }}>
                 <ambientLight />
                 <directionalLight position={[8, 20, 8]} />
-                <Crane craneState={craneState} dimensions={dimensions} />
+                {/* Add red dot at world origin */}
+                <mesh position={[0, 0, 0]}>
+                    <sphereGeometry args={[1.0, 32, 32]} />
+                    <meshStandardMaterial color="red" />
+                </mesh>
+                <Text
+                    position={[0.5, 0, 0]}
+                    fontSize={2}
+                    color="red"
+                    anchorX="left"
+                    anchorY="middle"
+                >
+                    World Origin
+                </Text>
+                <Crane craneState={craneState} orientation={orientation} dimensions={dimensions} />
             </Canvas>
         </div>
     );
