@@ -1,40 +1,42 @@
 import React, { useState } from 'react';
-import { CraneOrientation } from '../types/crane';
+import { WebSocketMessage, XYZPositionTarget } from '../types/messages';
 
-interface OrientationControlsProps {
-    onOrientationChange: (orientation: CraneOrientation) => void;
+interface XYZPositionControlProps {
+    sendCommand: (message: WebSocketMessage) => void;
 }
 
-const OrientationControls: React.FC<OrientationControlsProps> = ({ onOrientationChange }) => {
-    const [orientation, setOrientation] = useState<CraneOrientation>({
+const XYZPositionControl: React.FC<XYZPositionControlProps> = ({ sendCommand }) => {
+    const [position, setPosition] = useState<XYZPositionTarget>({
         x: 0,
         y: 0,
-        z: 0,
-        rotationZ: 0
+        z: 0
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onOrientationChange(orientation);
+        sendCommand({
+            type: 'xyz_position',
+            target: position
+        });
     };
 
-    const handleChange = (field: keyof CraneOrientation) => (e: React.ChangeEvent<HTMLInputElement>) => {
-        setOrientation(prev => ({
+    const handleChange = (field: keyof XYZPositionTarget) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPosition(prev => ({
             ...prev,
             [field]: parseFloat(e.target.value)
         }));
     };
 
     return (
-        <div className="orientation-controls">
-            <h2>Crane Origin</h2>
+        <div className="xyz-position-control">
+            <h2>Move Crane To XYZ</h2>
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>
                         X Position:
                         <input
                             type="number"
-                            value={orientation.x}
+                            value={position.x}
                             onChange={handleChange('x')}
                             step="0.1"
                         />
@@ -45,7 +47,7 @@ const OrientationControls: React.FC<OrientationControlsProps> = ({ onOrientation
                         Y Position:
                         <input
                             type="number"
-                            value={orientation.y}
+                            value={position.y}
                             onChange={handleChange('y')}
                             step="0.1"
                         />
@@ -56,27 +58,16 @@ const OrientationControls: React.FC<OrientationControlsProps> = ({ onOrientation
                         Z Position:
                         <input
                             type="number"
-                            value={orientation.z}
+                            value={position.z}
                             onChange={handleChange('z')}
                             step="0.1"
                         />
                     </label>
                 </div>
-                <div>
-                    <label>
-                        Z Rotation (degrees):
-                        <input
-                            type="number"
-                            value={orientation.rotationZ}
-                            onChange={handleChange('rotationZ')}
-                            step="1"
-                        />
-                    </label>
-                </div>
-                <button type="submit">Update Position</button>
+                <button type="submit">Send</button>
             </form>
         </div>
     );
 };
 
-export default OrientationControls; 
+export default XYZPositionControl; 

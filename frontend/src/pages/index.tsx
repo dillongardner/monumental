@@ -2,6 +2,7 @@ import useWebSocket from "../hooks/useWebSocket";
 import Crane from "../threejs/Crane";
 import Controls from "../components/Controls";
 import OrientationControls from "../components/OrientationControls";
+import XYZPositionControl from "../components/XYZPositionControl";
 import { useState } from "react";
 import { CraneOrientation } from "../types/crane";
 
@@ -26,6 +27,7 @@ export default function Home() {
             <div style={{ display: 'flex', gap: '20px' }}>
                 <Controls sendCommand={sendCommand} />
                 <OrientationControls onOrientationChange={handleOrientationChange} />
+                <XYZPositionControl sendCommand={sendCommand} />
             </div>
             <Crane craneState={craneState} orientation={orientation} />
         </div>
