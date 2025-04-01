@@ -51,6 +51,7 @@ class CraneOrientation:
 class Crane:
     # TODO: a crane also needs to have maximum extents for each motor
     max_speeds: CraneSpeeds = field(default_factory=CraneSpeeds)
+    base: Cylinder = field(default_factory=Cylinder)
     column: Box = field(default_factory=Box)
     upper_arm: Box = field(default_factory=Box)
     upper_spacer: Cylinder = field(default_factory=Cylinder)
@@ -174,6 +175,7 @@ DEFAULT_CRANE = Crane(
         wrist=10,
         gripper=0.05,
     ),
+    base=Cylinder(radius=0.5, height=0.4, segment=32),
     column=Box(width=0.3, height=3, depth=0.3),
     upper_arm=Box(width=1, height=0.3, depth=0.2),
     upper_spacer=Cylinder(radius=0.15, height=0.5, segment=32),
