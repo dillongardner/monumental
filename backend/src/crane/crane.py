@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 import math
-from typing import Optional, Tuple
+from typing import Optional
 import logging
 import numpy as np
 from crane.messages import XYZPositionTarget
@@ -16,25 +16,13 @@ class SwingLiftElbow:
 
 
 @dataclass
-class CraneState(SwingLiftElbow):
-    swing: float  # degrees
-    lift: float
-    elbow: float  # degrees
-    wrist: float  # degrees
+class CraneMotors(SwingLiftElbow):
+    wrist: float
     gripper: float
 
-    def update_state(self, new_state: dict):
-        for key, value in new_state.items():
-            setattr(self, key, value)
+class CraneState(CraneMotors): pass
 
-
-@dataclass
-class CraneSpeeds:
-    swing: float = 10  # degrees/sec
-    lift: float = 0.1  # m/sec
-    elbow: float = 10  # degrees/sec
-    wrist: float = 10  # degrees/sec
-    gripper: float = 0.05  # m/sec
+class CraneSpeeds(CraneMotors): pass
 
 
 @dataclass
@@ -64,10 +52,10 @@ class Crane:
     # TODO: a crane also needs to have maximum extents for each motor
     max_speeds: CraneSpeeds = field(default_factory=CraneSpeeds)
     column: Box = field(default_factory=Box)
-    elbow: Box = field(default_factory=Box)
-    upper_arm: Cylinder = field(default_factory=Cylinder)
-    wrist: Box = field(default_factory=Box)
-    lower_arm: Cylinder = field(default_factory=Cylinder)
+    upper_arm: Box = field(default_factory=Box)
+    upper_spacer: Cylinder = field(default_factory=Cylinder)
+    lower_arm: Box = field(default_factory=Box)
+    lower_spacer: Cylinder = field(default_factory=Cylinder)
     gripper: Box = field(default_factory=Box)
     orientation: CraneOrientation = field(default_factory=CraneOrientation)
 
@@ -88,21 +76,21 @@ class Crane:
         This solution is the elbow down solution with notation following the above reference
         """
         try:
-            if xyz.x**2 + xyz.z**2 > (self.elbow.width + self.wrist.width) ** 2:
+            if xyz.x**2 + xyz.z**2 > (self.upper_arm.width + self.lower_arm.width) ** 2:
                 logger.warning("Target is out of reach")
                 return None
-            lift = xyz.y + self.upper_arm.height + self.lower_arm.height
+            lift = xyz.y + self.upper_spacer.height + self.lower_spacer.height
 
             r = (xyz.x**2 + xyz.z**2) ** 0.5
             # Note: there is an additional negative sign here to account for the rotations being left-handed when looking in the x-z plane
             phi_3 = math.atan2(-xyz.z, xyz.x) * 180 / math.pi
-            _numerator_1 = self.elbow.width**2 + r**2 - self.wrist.width**2
-            _denominator_2 = 2 * self.elbow.width * r
+            _numerator_1 = self.upper_arm.width**2 + r**2 - self.lower_arm.width**2
+            _denominator_2 = 2 * self.upper_arm.width * r
             phi_1 = math.acos(_numerator_1 / _denominator_2) * 180 / math.pi
             swing = phi_3 - phi_1
 
-            _numerator_2 = self.elbow.width**2 + self.wrist.width**2 - r**2
-            _denominator_2 = 2 * self.elbow.width * self.wrist.width
+            _numerator_2 = self.upper_arm.width**2 + self.lower_arm.width**2 - r**2
+            _denominator_2 = 2 * self.upper_arm.width * self.lower_arm.width
             phi_2 = math.acos(_numerator_2 / _denominator_2) * 180 / math.pi
             elbow = 180 - phi_2
         except ValueError:
@@ -125,7 +113,12 @@ class Crane:
         mat_lift = np.array(
             [
                 [1, 0, 0, 0],
-                [0, 1, 0, state.lift - self.upper_arm.height - self.lower_arm.height],
+                [
+                    0,
+                    1,
+                    0,
+                    state.lift - self.upper_spacer.height - self.lower_spacer.height,
+                ],
                 [0, 0, 1, 0],
                 [0, 0, 0, 1],
             ]
@@ -137,14 +130,14 @@ class Crane:
                     cos(state.swing),
                     0,
                     sin(state.swing),
-                    cos(state.swing) * self.elbow.width,
+                    cos(state.swing) * self.upper_arm.width,
                 ],
                 [0, 1, 0, 0],
                 [
                     -sin(state.swing),
                     0,
                     cos(state.swing),
-                    -sin(state.swing) * self.elbow.width,
+                    -sin(state.swing) * self.upper_arm.width,
                 ],
                 [0, 0, 0, 1],
             ]
@@ -155,14 +148,14 @@ class Crane:
                     cos(state.elbow),
                     0,
                     sin(state.elbow),
-                    cos(state.elbow) * self.elbow.width,
+                    cos(state.elbow) * self.upper_arm.width,
                 ],
                 [0, 1, 0, 0],
                 [
                     -sin(state.elbow),
                     0,
                     cos(state.elbow),
-                    -sin(state.elbow) * self.elbow.width,
+                    -sin(state.elbow) * self.upper_arm.width,
                 ],
                 [0, 0, 0, 1],
             ]
@@ -174,10 +167,17 @@ class Crane:
 
 
 DEFAULT_CRANE = Crane(
+    max_speeds=CraneSpeeds(
+        swing=10,
+        lift=0.2,
+        elbow=10,
+        wrist=10,
+        gripper=0.05,
+    ),
     column=Box(width=0.3, height=3, depth=0.3),
-    elbow=Box(width=1, height=0.3, depth=0.2),
-    upper_arm=Cylinder(radius=0.15, height=0.5, segment=32),
-    wrist=Box(width=1, height=0.15, depth=0.15),
-    lower_arm=Cylinder(radius=0.1, height=0.5, segment=32),
+    upper_arm=Box(width=1, height=0.3, depth=0.2),
+    upper_spacer=Cylinder(radius=0.15, height=0.5, segment=32),
+    lower_arm=Box(width=1, height=0.15, depth=0.15),
+    lower_spacer=Cylinder(radius=0.1, height=0.5, segment=32),
     gripper=Box(width=0.5, height=0.1, depth=0.1),
 )

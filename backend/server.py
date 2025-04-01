@@ -4,9 +4,6 @@ from crane.motion_controller import MotionController
 from crane.messages import MessageType, CraneStateMessage, XYZPositionMessage
 import logging
 import sys
-from typing import Dict, Any, Union
-from enum import Enum
-from pydantic import BaseModel
 
 # Set up logging configuration
 logging.basicConfig(
