@@ -1,0 +1,59 @@
+import pytest
+from crane.crane import Crane, SwingLiftElbow, XYZPositionTarget, DEFAULT_CRANE
+import numpy as np
+
+
+def test_simple_cases():
+    crane = DEFAULT_CRANE
+    xyz_for_zeros = XYZPositionTarget(
+        x=DEFAULT_CRANE.elbow.width + DEFAULT_CRANE.wrist.width,
+        y=-DEFAULT_CRANE.upper_arm.height - DEFAULT_CRANE.lower_arm.height,
+        z=0,
+    )
+    swing_lift_elbow = crane.xyz_to_swing_lift_elbow(xyz_for_zeros)
+    assert swing_lift_elbow is not None
+    assert swing_lift_elbow.swing == 0
+    assert swing_lift_elbow.lift == 0
+    assert swing_lift_elbow.elbow == 0
+    out_of_bounds = XYZPositionTarget(
+        x=DEFAULT_CRANE.elbow.width + DEFAULT_CRANE.wrist.width + 1, 
+        y=0, 
+        z=0)
+    swing_lift_elbow = crane.xyz_to_swing_lift_elbow(out_of_bounds)
+    assert swing_lift_elbow is None
+        
+
+@pytest.mark.parametrize("swe_there", [
+    SwingLiftElbow(swing=30, lift=2, elbow=70),
+    SwingLiftElbow(swing=0, lift=0, elbow=0),
+    SwingLiftElbow(swing=45, lift=1, elbow=90),
+    SwingLiftElbow(swing=-30, lift=2.5, elbow=45),
+    SwingLiftElbow(swing=60, lift=1.5, elbow=120)
+])
+def test_swe_there_and_back_again(swe_there):
+    crane = DEFAULT_CRANE
+    xyz = crane.swing_lift_elbow_to_xyz(swe_there)
+    assert xyz is not None
+    swe_back = crane.xyz_to_swing_lift_elbow(xyz)
+    assert swe_back is not None
+    assert swe_back.swing == pytest.approx(swe_there.swing)
+    assert swe_back.lift == pytest.approx(swe_there.lift)
+    assert swe_back.elbow == pytest.approx(swe_there.elbow)
+
+
+@pytest.mark.parametrize("xyz_there", [
+    XYZPositionTarget(x=1, y=2, z=1),
+    XYZPositionTarget(x=0.5, y=1, z=0.5), 
+    XYZPositionTarget(x=1.5, y=0, z=0),
+    XYZPositionTarget(x=1, y=-0.5, z=0.8),
+    XYZPositionTarget(x=0.8, y=1.2, z=-0.3)
+])
+def test_xyz_there_and_back_again(xyz_there):
+    crane = DEFAULT_CRANE
+    swe = crane.xyz_to_swing_lift_elbow(xyz_there)
+    assert swe is not None
+    xyz_back = crane.swing_lift_elbow_to_xyz(swe)
+    assert xyz_back is not None
+    assert xyz_back.x == pytest.approx(xyz_there.x)
+    assert xyz_back.y == pytest.approx(xyz_there.y) 
+    assert xyz_back.z == pytest.approx(xyz_there.z)

@@ -88,19 +88,14 @@ class Crane:
         This solution is the elbow down solution with notation following the above reference
         """
         try:
-            if (
-                xyz.x**2 + xyz.z**2
-                > (self.elbow.width + self.wrist.width) ** 2
-            ):
+            if xyz.x**2 + xyz.z**2 > (self.elbow.width + self.wrist.width) ** 2:
                 logger.warning("Target is out of reach")
                 return None
             lift = xyz.y + self.upper_arm.height + self.lower_arm.height
 
             r = (xyz.x**2 + xyz.z**2) ** 0.5
             # Note: there is an additional negative sign here to account for the rotations being left-handed when looking in the x-z plane
-            phi_3 = (
-                math.atan2(-xyz.z, xyz.x) * 180 / math.pi
-            )  
+            phi_3 = math.atan2(-xyz.z, xyz.x) * 180 / math.pi
             _numerator_1 = self.elbow.width**2 + r**2 - self.wrist.width**2
             _denominator_2 = 2 * self.elbow.width * r
             phi_1 = math.acos(_numerator_1 / _denominator_2) * 180 / math.pi
@@ -120,39 +115,62 @@ class Crane:
             return None
         return SwingLiftElbow(swing, lift, elbow)
 
-
     def swing_lift_elbow_to_xyz(self, state: SwingLiftElbow) -> XYZPositionTarget:
         def cos(angle_degrees: float) -> float:
             return np.cos(angle_degrees * np.pi / 180)
 
         def sin(angle_degrees: float) -> float:
             return np.sin(angle_degrees * np.pi / 180)
-        
-        mat_lift = np.array([
-            [1, 0, 0, 0],
-            [0, 1, 0, state.lift - self.upper_arm.height - self.lower_arm.height],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1],
-        ])
+
+        mat_lift = np.array(
+            [
+                [1, 0, 0, 0],
+                [0, 1, 0, state.lift - self.upper_arm.height - self.lower_arm.height],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+            ]
+        )
 
         mat_swing = np.array(
             [
-                [cos(state.swing), 0, sin(state.swing), cos(state.swing)*self.elbow.width],
+                [
+                    cos(state.swing),
+                    0,
+                    sin(state.swing),
+                    cos(state.swing) * self.elbow.width,
+                ],
                 [0, 1, 0, 0],
-                [-sin(state.swing), 0, cos(state.swing), -sin(state.swing)*self.elbow.width],
+                [
+                    -sin(state.swing),
+                    0,
+                    cos(state.swing),
+                    -sin(state.swing) * self.elbow.width,
+                ],
                 [0, 0, 0, 1],
             ]
         )
         mat_elbow = np.array(
             [
-                [cos(state.elbow), 0, sin(state.elbow), cos(state.elbow)*self.elbow.width],
+                [
+                    cos(state.elbow),
+                    0,
+                    sin(state.elbow),
+                    cos(state.elbow) * self.elbow.width,
+                ],
                 [0, 1, 0, 0],
-                [-sin(state.elbow), 0, cos(state.elbow), -sin(state.elbow)*self.elbow.width],
+                [
+                    -sin(state.elbow),
+                    0,
+                    cos(state.elbow),
+                    -sin(state.elbow) * self.elbow.width,
+                ],
                 [0, 0, 0, 1],
             ]
         )
         full_matrix = mat_lift @ mat_swing @ mat_elbow
-        return XYZPositionTarget(x=full_matrix[0, -1], y=full_matrix[1, -1], z=full_matrix[2, -1])
+        return XYZPositionTarget(
+            x=full_matrix[0, -1], y=full_matrix[1, -1], z=full_matrix[2, -1]
+        )
 
 
 DEFAULT_CRANE = Crane(
