@@ -1,10 +1,11 @@
 import { Canvas } from "@react-three/fiber";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useControls } from "leva"; // For debugging movements
 import React from 'react';
 import { CraneOrientation, CraneState } from '../types/crane';
 import { Text } from '@react-three/drei';
+import { XYZPositionTarget } from '../types/messages';
 
 // Define the dimensions interface
 interface CraneDimensions {
@@ -99,6 +100,7 @@ interface SceneProps {
     craneState: CraneState;
     orientation: CraneOrientation;
     dimensions?: CraneDimensions;
+    targetPosition: XYZPositionTarget | null;
 }
 
 const Crane: React.FC<CraneProps> = ({ craneState, orientation, dimensions = DEFAULT_DIMENSIONS }) => {
@@ -164,7 +166,7 @@ const Crane: React.FC<CraneProps> = ({ craneState, orientation, dimensions = DEF
     );
 };
 
-export default function Scene({ craneState, orientation, dimensions }: SceneProps) {
+export default function Scene({ craneState, orientation, dimensions, targetPosition }: SceneProps) {
     return (
         <div style={{ width: '100%', height: '100vh' }}>
             <Canvas camera={{ 
@@ -176,20 +178,53 @@ export default function Scene({ craneState, orientation, dimensions }: SceneProp
                 <ambientLight />
                 <directionalLight position={[8, 20, 8]} />
                 {/* Add red dot at world origin */}
-                <mesh position={[0, 0, 0]}>
-                    <sphereGeometry args={[1.0, 32, 32]} />
+                <mesh position={[0, 0, 0]} scale={GLOBAL_SCALE}>
+                    <sphereGeometry args={[0.1, 32, 32]} />
                     <meshStandardMaterial color="red" />
                 </mesh>
                 <Text
-                    position={[0.5, 0, 0]}
-                    fontSize={2}
+                    position={[0.5 * GLOBAL_SCALE, 0, 0]}
+                    fontSize={0.2 * GLOBAL_SCALE}
                     color="red"
                     anchorX="left"
                     anchorY="middle"
                 >
                     World Origin
                 </Text>
-                <Crane craneState={craneState} orientation={orientation} dimensions={dimensions} />
+                {/* Add green dot at target position */}
+                {targetPosition && (
+                    <>
+                        <mesh 
+                            position={[
+                                targetPosition.x * GLOBAL_SCALE, 
+                                targetPosition.y * GLOBAL_SCALE, 
+                                targetPosition.z * GLOBAL_SCALE
+                            ]} 
+                            scale={GLOBAL_SCALE}
+                        >
+                            <sphereGeometry args={[0.1, 32, 32]} />
+                            <meshStandardMaterial color="green" />
+                        </mesh>
+                        <Text
+                            position={[
+                                (targetPosition.x + 0.5) * GLOBAL_SCALE, 
+                                targetPosition.y * GLOBAL_SCALE, 
+                                targetPosition.z * GLOBAL_SCALE
+                            ]}
+                            fontSize={0.2 * GLOBAL_SCALE}
+                            color="green"
+                            anchorX="left"
+                            anchorY="middle"
+                        >
+                            Target Position
+                        </Text>
+                    </>
+                )}
+                <Crane 
+                    craneState={craneState} 
+                    orientation={orientation} 
+                    dimensions={dimensions}
+                />
             </Canvas>
         </div>
     );

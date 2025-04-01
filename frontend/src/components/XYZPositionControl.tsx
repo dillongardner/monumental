@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { WebSocketMessage, XYZPositionTarget } from '../types/messages';
+import { XYZPositionTarget } from '../types/messages';
 
 interface XYZPositionControlProps {
-    sendCommand: (message: WebSocketMessage) => void;
+    onPositionSubmit: (position: XYZPositionTarget) => void;
 }
 
-const XYZPositionControl: React.FC<XYZPositionControlProps> = ({ sendCommand }) => {
+const XYZPositionControl: React.FC<XYZPositionControlProps> = ({ onPositionSubmit }) => {
     const [position, setPosition] = useState<XYZPositionTarget>({
         x: 0,
         y: 0,
@@ -14,10 +14,7 @@ const XYZPositionControl: React.FC<XYZPositionControlProps> = ({ sendCommand }) 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        sendCommand({
-            type: 'xyz_position',
-            target: position
-        });
+        onPositionSubmit(position);
     };
 
     const handleChange = (field: keyof XYZPositionTarget) => (e: React.ChangeEvent<HTMLInputElement>) => {
