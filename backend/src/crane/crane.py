@@ -3,7 +3,7 @@ import math
 from typing import Optional
 import logging
 import numpy as np
-from crane.messages import XYZPositionTarget
+from crane.models import CraneOrientationModel, XYZPositionTarget
 
 logger = logging.getLogger(__name__)
 
@@ -165,7 +165,21 @@ class Crane:
         return XYZPositionTarget(
             x=full_matrix[0, -1], y=full_matrix[1, -1], z=full_matrix[2, -1]
         )
-
+    
+    def xyz_to_crane_state(self, xyz: XYZPositionTarget, current_state: CraneState, orientation: CraneOrientation) -> Optional[CraneState]:
+        swing_lift_elbow = self.xyz_to_swing_lift_elbow(xyz)
+        if swing_lift_elbow is None:
+            return None
+        if orientation != CraneOrientationModel():
+            logger.error(f"Not implemented for non-trivial orientations. Received orientation: {orientation}")
+            return None
+        return CraneState(
+            swing=swing_lift_elbow.swing,
+            lift=swing_lift_elbow.lift,
+            elbow=swing_lift_elbow.elbow,
+            wrist=current_state.wrist,
+            gripper=current_state.gripper
+        )
 
 DEFAULT_CRANE = Crane(
     max_speeds=CraneSpeeds(

@@ -2,13 +2,11 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-class MessageType(str, Enum):
-    CRANE_STATE = "crane_state"
-    XYZ_POSITION = "xyz_position"
-
-
-class BaseMessage(BaseModel):
-    type: MessageType
+class CraneOrientationModel(BaseModel):
+    x: float = 0
+    y: float = 0 
+    z: float = 0
+    rotationZ: float = 0
 
 
 class CraneStateTarget(BaseModel):
@@ -23,6 +21,16 @@ class XYZPositionTarget(BaseModel):
     x: float
     y: float
     z: float
+
+
+class MessageType(str, Enum):
+    CRANE_STATE = "crane_state"
+    XYZ_POSITION = "xyz_position"
+
+
+class BaseMessage(BaseModel):
+    type: MessageType
+    orientation: CraneOrientationModel
 
 
 class CraneStateMessage(BaseMessage):

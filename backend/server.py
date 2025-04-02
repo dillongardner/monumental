@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket
 from crane.crane import CraneState, DEFAULT_CRANE
 from crane.motion_controller import MotionController
-from crane.messages import MessageType, CraneStateMessage, XYZPositionMessage
+from crane.models import MessageType, CraneStateMessage, XYZPositionMessage
 import logging
 import sys
 
@@ -22,6 +22,15 @@ crane = DEFAULT_CRANE
 controller = MotionController(initial_state, crane)
 
 
+async def update_crane_state(websocket: WebSocket, target_state: CraneState) -> None:
+    logger.info(f"Moving to target state: {target_state.__dict__}")
+
+    async def send_update(state):
+        logger.debug(f"State update: {state.__dict__}")
+        await websocket.send_json(state.__dict__)
+
+    await controller.apply_motion(target_state, on_update=send_update)
+
 async def handle_crane_state_message(
     websocket: WebSocket, message: CraneStateMessage
 ) -> None:
@@ -32,13 +41,7 @@ async def handle_crane_state_message(
         wrist=message.target.wrist,
         gripper=message.target.gripper,
     )
-    logger.info(f"Moving to target state: {target_state.__dict__}")
-
-    async def send_update(state):
-        logger.debug(f"State update: {state.__dict__}")
-        await websocket.send_json(state.__dict__)
-
-    await controller.apply_motion(target_state, on_update=send_update)
+    await update_crane_state(websocket, target_state)
 
 
 async def handle_xyz_position_message(
@@ -47,8 +50,13 @@ async def handle_xyz_position_message(
     # TODO: Implement inverse kinematics to convert xyz to crane state
     # For now, just log the request
     logger.info(f"Received XYZ position request: {message.target}")
-    # Here you would implement the inverse kinematics calculation
-    # and then call controller.apply_motion with the resulting crane state
+    target_state = controller.crane.xyz_to_crane_state(message.target, 
+                                                       controller.state, 
+                                                       message.orientation)
+    if target_state:
+        await update_crane_state(websocket, target_state)
+    else:
+        logger.error("Failed to convert XYZ position to crane state")
 
 
 @app.websocket("/ws")
@@ -72,6 +80,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 continue
 
             await websocket.send_json(controller.state.__dict__)
-        except Exception as e:
-            logger.error(f"WebSocket error: {e}", exc_info=True)
+        except KeyboardInterrupt as e:
+            logger.info("Keyboard interrupt")
             raise e
+        except Exception as e:
+            logger.error(f"Unknown error: {e}", exc_info=True)

@@ -6,7 +6,7 @@ from dataclasses import fields
 
 import logging
 
-from crane.messages import XYZPositionTarget
+from crane.models import XYZPositionTarget
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class MotionController:
         while asyncio.get_event_loop().time() - start_time < max_duration:
             async with self._motion_lock:
                 for field in fields(self.crane.max_speeds):
-                    step = getattr(self.max_speeds[field.name]) * 0.1  # Adjust per tick
+                    step = getattr(self.crane.max_speeds, field.name) * 0.1  # Adjust per tick
                     current = getattr(self.state, field.name)
                     target = getattr(target_state, field.name)
 
