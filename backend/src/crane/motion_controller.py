@@ -1,12 +1,9 @@
 import asyncio
-import math
-from crane.crane import CraneSpeeds, CraneState, Crane
+from crane.crane import CraneState, Crane
 from typing import Callable, Awaitable, Optional
 from dataclasses import fields
 
 import logging
-
-from crane.models import XYZPositionTarget
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +12,7 @@ class MotionController:
     def __init__(self, state: CraneState, crane: Crane):
         self.state = state
         self.crane = crane
+        self.time_step = 0.1
         self._current_task: Optional[asyncio.Task] = None
         self._motion_lock = asyncio.Lock()
 
@@ -33,33 +31,33 @@ class MotionController:
 
         while asyncio.get_event_loop().time() - start_time < max_duration:
             async with self._motion_lock:
-                for field in fields(self.crane.max_speeds):
-                    step = getattr(self.crane.max_speeds, field.name) * 0.1  # Adjust per tick
-                    current = getattr(self.state, field.name)
-                    target = getattr(target_state, field.name)
+                for field in self.crane.max_speeds.model_fields.keys():
+                    step = getattr(self.crane.max_speeds, field) * self.time_step  # Adjust per tick
+                    current = getattr(self.state, field)
+                    target = getattr(target_state, field)
 
                     if abs(target - current) > step:
                         logger.debug(
-                            f"Moving {field.name} from {current} to {current + step if target > current else current - step}"
+                            f"Moving {field} from {current} to {current + step if target > current else current - step}"
                         )
                         setattr(
                             self.state,
-                            field.name,
+                            field,
                             current + step if target > current else current - step,
                         )
                     else:
-                        setattr(self.state, field.name, target)
+                        setattr(self.state, field, target)
 
                 if on_update:
                     await on_update(self.state)
                 # Check if we've reached the target state
                 if all(
-                    getattr(self.state, field.name) == getattr(target_state, field.name)
-                    for field in fields(self.state)
+                    getattr(self.state, field) == getattr(target_state, field)
+                    for field in self.state.model_fields.keys()
                 ):
                     logger.info("Reached target state")
                     break
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(self.time_step)
 
     async def apply_motion(
         self,

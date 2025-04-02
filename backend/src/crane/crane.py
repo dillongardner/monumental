@@ -1,28 +1,14 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import math
 from typing import Optional
 import logging
 import numpy as np
-from crane.models import CraneOrientationModel, XYZPositionTarget
+from crane.models import CraneOrientation, XYZPosition, SwingLiftElbow, CraneState, CraneSpeeds
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class SwingLiftElbow:
-    swing: float
-    lift: float
-    elbow: float
 
-
-@dataclass
-class CraneMotors(SwingLiftElbow):
-    wrist: float
-    gripper: float
-
-class CraneState(CraneMotors): pass
-
-class CraneSpeeds(CraneMotors): pass
 
 
 @dataclass
@@ -39,33 +25,26 @@ class Box:
     depth: float = 1
 
 
-@dataclass
-class CraneOrientation:
-    x: float = 0
-    y: float = 0
-    z: float = 0
-    rotationZ: float = 0
-
 
 @dataclass
 class Crane:
     # TODO: a crane also needs to have maximum extents for each motor
-    max_speeds: CraneSpeeds = field(default_factory=CraneSpeeds)
-    base: Cylinder = field(default_factory=Cylinder)
-    column: Box = field(default_factory=Box)
-    upper_arm: Box = field(default_factory=Box)
-    upper_spacer: Cylinder = field(default_factory=Cylinder)
-    lower_arm: Box = field(default_factory=Box)
-    lower_spacer: Cylinder = field(default_factory=Cylinder)
-    gripper: Box = field(default_factory=Box)
-    orientation: CraneOrientation = field(default_factory=CraneOrientation)
+    max_speeds: CraneSpeeds 
+    base: Cylinder 
+    column: Box 
+    upper_arm: Box 
+    upper_spacer: Cylinder 
+    lower_arm: Box 
+    lower_spacer: Cylinder 
+    gripper: Box 
+    orientation: CraneOrientation
 
     def is_valid_state(self, state: CraneState) -> bool:
         # TODO: Add real check to see if state is valid for crane
         return True
 
     def xyz_to_swing_lift_elbow(
-        self, xyz: XYZPositionTarget
+        self, xyz: XYZPosition
     ) -> Optional[SwingLiftElbow]:
         """
         Convert an xyz position to the necessary lift, swing, and elbow
@@ -102,9 +81,9 @@ class Crane:
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             return None
-        return SwingLiftElbow(swing, lift, elbow)
+        return SwingLiftElbow(swing=swing, lift=lift, elbow=elbow)
 
-    def swing_lift_elbow_to_xyz(self, state: SwingLiftElbow) -> XYZPositionTarget:
+    def swing_lift_elbow_to_xyz(self, state: SwingLiftElbow) -> XYZPosition:
         def cos(angle_degrees: float) -> float:
             return np.cos(angle_degrees * np.pi / 180)
 
@@ -162,15 +141,15 @@ class Crane:
             ]
         )
         full_matrix = mat_lift @ mat_swing @ mat_elbow
-        return XYZPositionTarget(
+        return XYZPosition(
             x=full_matrix[0, -1], y=full_matrix[1, -1], z=full_matrix[2, -1]
         )
     
-    def xyz_to_crane_state(self, xyz: XYZPositionTarget, current_state: CraneState, orientation: CraneOrientation) -> Optional[CraneState]:
+    def xyz_to_crane_state(self, xyz: XYZPosition, current_state: CraneState, orientation: CraneOrientation) -> Optional[CraneState]:
         swing_lift_elbow = self.xyz_to_swing_lift_elbow(xyz)
         if swing_lift_elbow is None:
             return None
-        if orientation != CraneOrientationModel():
+        if orientation != CraneOrientation():
             logger.error(f"Not implemented for non-trivial orientations. Received orientation: {orientation}")
             return None
         return CraneState(
@@ -196,4 +175,5 @@ DEFAULT_CRANE = Crane(
     lower_arm=Box(width=1, height=0.15, depth=0.15),
     lower_spacer=Cylinder(radius=0.1, height=0.5, segment=32),
     gripper=Box(width=0.5, height=0.1, depth=0.1),
+    orientation=CraneOrientation(x=0, y=0, z=0, rotationZ=0),
 )

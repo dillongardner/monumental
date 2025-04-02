@@ -17,7 +17,7 @@ logger.setLevel(logging.DEBUG)
 
 
 app = FastAPI()
-initial_state = CraneState(0, 2, 0, 0, 0)
+initial_state = CraneState(swing=0, lift=2, elbow=0, wrist=0, gripper=0)
 crane = DEFAULT_CRANE
 controller = MotionController(initial_state, crane)
 

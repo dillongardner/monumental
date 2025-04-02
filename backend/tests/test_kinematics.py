@@ -1,10 +1,10 @@
 import pytest
-from crane.crane import SwingLiftElbow, XYZPositionTarget, DEFAULT_CRANE
+from crane.crane import SwingLiftElbow, XYZPosition, DEFAULT_CRANE
 
 
 def test_simple_cases():
     crane = DEFAULT_CRANE
-    xyz_for_zeros = XYZPositionTarget(
+    xyz_for_zeros = XYZPosition(
         x=DEFAULT_CRANE.upper_arm.width + DEFAULT_CRANE.lower_arm.width,
         y=-DEFAULT_CRANE.upper_spacer.height - DEFAULT_CRANE.lower_spacer.height,
         z=0,
@@ -14,7 +14,7 @@ def test_simple_cases():
     assert swing_lift_elbow.swing == 0
     assert swing_lift_elbow.lift == 0
     assert swing_lift_elbow.elbow == 0
-    out_of_bounds = XYZPositionTarget(
+    out_of_bounds = XYZPosition(
         x=DEFAULT_CRANE.upper_arm.width + DEFAULT_CRANE.lower_arm.width + 1, y=0, z=0
     )
     swing_lift_elbow = crane.xyz_to_swing_lift_elbow(out_of_bounds)
@@ -45,11 +45,11 @@ def test_swe_there_and_back_again(swe_there):
 @pytest.mark.parametrize(
     "xyz_there",
     [
-        XYZPositionTarget(x=1, y=2, z=1),
-        XYZPositionTarget(x=0.5, y=1, z=0.5),
-        XYZPositionTarget(x=1.5, y=0, z=0),
-        XYZPositionTarget(x=1, y=-0.5, z=0.8),
-        XYZPositionTarget(x=0.8, y=1.2, z=-0.3),
+        XYZPosition(x=1, y=2, z=1),
+        XYZPosition(x=0.5, y=1, z=0.5),
+        XYZPosition(x=1.5, y=0, z=0),
+        XYZPosition(x=1, y=-0.5, z=0.8),
+        XYZPosition(x=0.8, y=1.2, z=-0.3),
     ],
 )
 def test_xyz_there_and_back_again(xyz_there):
