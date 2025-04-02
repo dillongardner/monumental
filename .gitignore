@@ -16,3 +16,6 @@ wheels/
 # Frontend build and dependencies
 frontend/.next/
 frontend/node_modules/
+
+# vscode
+.vscode/

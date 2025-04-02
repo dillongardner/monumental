@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket
-from crane.crane import CraneState, DEFAULT_CRANE
+from crane.crane_service import CraneService, CraneState
 from crane.motion_controller import MotionController
-from crane.models import MessageType, CraneStateMessage, XYZPositionMessage
+from crane.models import CraneOrientation, MessageType, CraneStateMessage, XYZPositionMessage, DEFAULT_CRANE
 import logging
 import sys
 
@@ -18,9 +18,10 @@ logger.setLevel(logging.DEBUG)
 
 app = FastAPI()
 initial_state = CraneState(swing=0, lift=2, elbow=0, wrist=0, gripper=0)
+initial_orientation = CraneOrientation(x=0, y=0, z=0, rotationZ=0)
 crane = DEFAULT_CRANE
+service = CraneService(crane)
 controller = MotionController(initial_state, crane)
-
 
 async def update_crane_state(websocket: WebSocket, target_state: CraneState) -> None:
     logger.info(f"Moving to target state: {target_state.__dict__}")
@@ -50,7 +51,7 @@ async def handle_xyz_position_message(
     # TODO: Implement inverse kinematics to convert xyz to crane state
     # For now, just log the request
     logger.info(f"Received XYZ position request: {message.target}")
-    target_state = controller.crane.xyz_to_crane_state(message.target, 
+    target_state = service.xyz_to_crane_state(message.target, 
                                                        controller.state, 
                                                        message.orientation)
     if target_state:

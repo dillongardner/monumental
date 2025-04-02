@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { CraneOrientation } from '../types/crane';
+import { XYZPositionTarget } from '../types/messages';
 
 interface OrientationControlsProps {
-    onOrientationChange: (orientation: CraneOrientation) => void;
+    onOrientationChange: (orientation: CraneOrientation, targetPosition: XYZPositionTarget | null) => void;
+    targetPosition: XYZPositionTarget | null;
 }
 
-const OrientationControls: React.FC<OrientationControlsProps> = ({ onOrientationChange }) => {
+const OrientationControls: React.FC<OrientationControlsProps> = ({ onOrientationChange, targetPosition }) => {
     const [orientation, setOrientation] = useState<CraneOrientation>({
         x: 0,
         y: 0,
@@ -15,7 +17,7 @@ const OrientationControls: React.FC<OrientationControlsProps> = ({ onOrientation
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onOrientationChange(orientation);
+        onOrientationChange(orientation, targetPosition);
     };
 
     const handleChange = (field: keyof CraneOrientation) => (e: React.ChangeEvent<HTMLInputElement>) => {
