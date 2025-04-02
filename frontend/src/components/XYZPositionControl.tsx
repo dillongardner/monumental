@@ -26,7 +26,7 @@ const XYZPositionControl: React.FC<XYZPositionControlProps> = ({ onPositionSubmi
 
     return (
         <div className="xyz-position-control">
-            <h2>Move Crane To XYZ</h2>
+            <h2>XYZ Controls</h2>
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>

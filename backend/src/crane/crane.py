@@ -44,7 +44,7 @@ class CraneOrientation:
     x: float = 0
     y: float = 0
     z: float = 0
-    y_rotation: float = 0
+    rotationZ: float = 0
 
 
 @dataclass

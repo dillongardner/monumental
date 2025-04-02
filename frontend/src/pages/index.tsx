@@ -1,13 +1,13 @@
 import useWebSocket from "../hooks/useWebSocket";
 import Crane from "../threejs/Crane";
-import Controls from "../components/Controls";
+import MotorControls from "../components/MotorControls";
 import OrientationControls from "../components/OrientationControls";
 import XYZPositionControl from "../components/XYZPositionControl";
 import { useState } from "react";
 import { CraneOrientation } from "../types/crane";
-import { XYZPositionTarget } from "../types/messages";
+import { XYZPositionTarget, CraneStateMessage } from "../types/messages";
 
-export default function Home() {
+export default function Page() {
     const { craneState, sendCommand } = useWebSocket();
     const [orientation, setOrientation] = useState<CraneOrientation>({
         x: 0,
@@ -27,7 +27,16 @@ export default function Home() {
         setTargetPosition(position);
         sendCommand({
             type: 'xyz_position',
-            target: position
+            target: position,
+            orientation: orientation
+        });
+    };
+
+    const handleControlsSubmit = (message: CraneStateMessage) => {
+        sendCommand({
+            type: 'crane_state',
+            target: message.target,
+            orientation: orientation
         });
     };
 
@@ -35,9 +44,9 @@ export default function Home() {
         <div>
             <h1>Crane Simulator</h1>
             <div style={{ display: 'flex', gap: '20px' }}>
-                <Controls sendCommand={sendCommand} />
-                <OrientationControls onOrientationChange={handleOrientationChange} />
+                <MotorControls sendCommand={handleControlsSubmit} />
                 <XYZPositionControl onPositionSubmit={handleXYZPositionSubmit} />
+                <OrientationControls onOrientationChange={handleOrientationChange} />
             </div>
             <Crane 
                 craneState={craneState} 

@@ -5,7 +5,7 @@ interface ControlsProps {
     sendCommand: (message: CraneStateMessage) => void;
 }
 
-export default function Controls({ sendCommand }: ControlsProps) {
+export default function MotorControls({ sendCommand }: ControlsProps) {
     const [motors, setValues] = React.useState<CraneStateTarget>({
         swing: 0,
         lift: 1,
@@ -26,7 +26,8 @@ export default function Controls({ sendCommand }: ControlsProps) {
         setPreviousValues({...motors});
         sendCommand({
             type: 'crane_state',
-            target: motors
+            target: motors,
+            orientation: { x: 0, y: 0, z: 0, rotationZ: 0 } // This will be overridden by the parent
         });
     };
 
@@ -35,8 +36,8 @@ export default function Controls({ sendCommand }: ControlsProps) {
     };
 
     return (
-        <div className="controls-container">
-            <h2>Crane Motors</h2>
+        <div className="motor-controls-container">
+            <h2>Motor Controls</h2>
             <div>
                 <label>Swing: </label>
                 <input 

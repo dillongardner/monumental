@@ -87,7 +87,7 @@ const DEFAULT_DIMENSIONS: CraneDimensions = {
 };
 
 // Add this constant at the top with other constants
-const GLOBAL_SCALE = 8;
+const GLOBAL_SCALE = 6;
 
 // Define the props interface
 interface CraneProps {
@@ -108,7 +108,8 @@ const Crane: React.FC<CraneProps> = ({ craneState, orientation, dimensions = DEF
     const { swing, lift, elbow, wrist, gripper} = craneState;
 
     return (
-        <group position={[orientation.x, orientation.y, orientation.z]} rotation={[0, 0, orientation.rotationZ * (Math.PI / 180)]} scale={GLOBAL_SCALE}>
+        <group scale={GLOBAL_SCALE}>
+        <group position={[orientation.x, orientation.y, orientation.z]} rotation={[0, 0, orientation.rotationZ * (Math.PI / 180)]}>
             <mesh position={[0, dimensions.base.height / 2, 0]}>
                 <cylinderGeometry args={[dimensions.base.radius, dimensions.base.radius, dimensions.base.height, dimensions.base.segments]} />
                 <meshStandardMaterial color="gray" transparent opacity={0.5} />
@@ -162,6 +163,7 @@ const Crane: React.FC<CraneProps> = ({ craneState, orientation, dimensions = DEF
                     </group>
                 </group>
             </group>
+        </group>
         </group>
     );
 };

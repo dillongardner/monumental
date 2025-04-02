@@ -1,7 +1,10 @@
+import { CraneOrientation } from './crane';
+
 export type MessageType = 'crane_state' | 'xyz_position';
 
 export interface BaseMessage {
     type: MessageType;
+    orientation: CraneOrientation;
 }
 
 export interface CraneStateTarget {
