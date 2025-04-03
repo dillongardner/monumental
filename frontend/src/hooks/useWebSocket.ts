@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { WebSocketMessage, CraneStateTarget } from "../types/messages";
+import { WebSocketMessage, CraneStateTarget, Response } from "../types/messages";
 
 const DEFAULT_CRANE_STATE: CraneStateTarget = {
     swing: 0,
@@ -11,6 +11,7 @@ const DEFAULT_CRANE_STATE: CraneStateTarget = {
 
 export default function useWebSocket() {
     const [craneState, setCraneState] = useState<CraneStateTarget>(DEFAULT_CRANE_STATE);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
@@ -19,16 +20,23 @@ export default function useWebSocket() {
         wsRef.current.onmessage = (event) => {
             console.log("Received message:", event.data);
             try {
-                const data = JSON.parse(event.data);
+                const data: Response = JSON.parse(event.data);
+                
+                if (!data.success) {
+                    setErrorMessage(data.errorMessage || "The request failed with missing message");
+                    return;
+                }
+                
+                setErrorMessage(null);
                 const new_crane_state = data.craneState;
                 
                 // Validate the received data matches our CraneStateTarget type
                 if (
-                    typeof new_crane_state.lift === 'number' &&
-                    typeof new_crane_state.swing === 'number' &&
-                    typeof new_crane_state.elbow === 'number' &&
-                    typeof new_crane_state.wrist === 'number' &&
-                    typeof new_crane_state.gripper === 'number'
+                    typeof new_crane_state?.lift === 'number' &&
+                    typeof new_crane_state?.swing === 'number' &&
+                    typeof new_crane_state?.elbow === 'number' &&
+                    typeof new_crane_state?.wrist === 'number' &&
+                    typeof new_crane_state?.gripper === 'number'
                 ) {
                     setCraneState(new_crane_state);
                 } else {
@@ -36,6 +44,7 @@ export default function useWebSocket() {
                 }
             } catch (error) {
                 console.error("Error parsing JSON:", error);
+                setErrorMessage("Error processing server response");
             }
         };
         
@@ -51,5 +60,5 @@ export default function useWebSocket() {
         }
     };
 
-    return { craneState, sendCommand };
+    return { craneState, sendCommand, errorMessage };
 }

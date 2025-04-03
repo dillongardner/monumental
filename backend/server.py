@@ -65,7 +65,7 @@ async def handle_xyz_position_message(
         await update_crane_state(websocket, target_state, message.orientation)
     else:
         logger.error("Failed to convert XYZ position to crane state")
-        await websocket.send_json(Response(success=False).model_dump())
+        await websocket.send_json(Response(success=False, errorMessage="No valid way to reach target position").model_dump())
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

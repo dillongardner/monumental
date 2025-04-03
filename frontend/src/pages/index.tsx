@@ -8,7 +8,7 @@ import { CraneOrientation } from "../types/crane";
 import { XYZPositionTarget, CraneStateMessage } from "../types/messages";
 
 export default function Page() {
-    const { craneState, sendCommand } = useWebSocket();
+    const { craneState, sendCommand, errorMessage } = useWebSocket();
     const [orientation, setOrientation] = useState<CraneOrientation>({
         x: 0,
         y: 0,
@@ -48,6 +48,11 @@ export default function Page() {
     return (
         <div>
             <h1>Crane Simulator</h1>
+            {errorMessage && (
+                <div style={{ color: 'red', marginBottom: '20px' }}>
+                    {errorMessage}
+                </div>
+            )}
             <div style={{ display: 'flex', gap: '20px' }}>
                 <MotorControls sendCommand={handleControlsSubmit} />
                 <XYZPositionControl onPositionSubmit={handleXYZPositionSubmit} />

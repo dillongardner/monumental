@@ -102,4 +102,5 @@ class Response(BaseModel):
     xyzPosition: Optional[XYZPosition] = None
     targetState: Optional[CraneState] = None
     targetXyzPostion: Optional[XYZPosition] = None
+    errorMessage: Optional[str] = None
     success: bool

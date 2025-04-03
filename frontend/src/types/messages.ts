@@ -31,4 +31,13 @@ export interface XYZPositionMessage extends BaseMessage {
     target: XYZPositionTarget;
 }
 
-export type WebSocketMessage = CraneStateMessage | XYZPositionMessage; 
+export type WebSocketMessage = CraneStateMessage | XYZPositionMessage;
+
+export interface Response {
+    craneState?: CraneStateTarget;
+    xyzPosition?: XYZPositionTarget;
+    targetState?: CraneStateTarget;
+    targetXyzPostion?: XYZPositionTarget;
+    success: boolean;
+    errorMessage?: string;
+} 
