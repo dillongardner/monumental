@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
-import { CraneStateMessage, CraneStateTarget } from '../types/messages';
+import { CraneStateMessage } from '../types/messages';
+import { CraneState } from '../types/crane';
+import FormControls, { FormField } from './FormControls';
 
 interface ControlsProps {
     sendCommand: (message: CraneStateMessage) => void;
-    currentState?: CraneStateTarget;
+    currentState?: CraneState;
 }
 
 export default function MotorControls({ sendCommand, currentState }: ControlsProps) {
-    const [motors, setValues] = React.useState<CraneStateTarget>({
+    const [motors, setValues] = React.useState<CraneState>({
         swing: 0,
         lift: 1,
         elbow: 0,
@@ -16,7 +18,7 @@ export default function MotorControls({ sendCommand, currentState }: ControlsPro
     });
     
     // Keep track of previous state for reset functionality
-    const [previousValues, setPreviousValues] = React.useState<CraneStateTarget>({...motors});
+    const [previousValues, setPreviousValues] = React.useState<CraneState>({...motors});
 
     // Update motors when currentState changes
     useEffect(() => {
@@ -25,9 +27,8 @@ export default function MotorControls({ sendCommand, currentState }: ControlsPro
         }
     }, [currentState]);
 
-    const handleChange = (key: keyof CraneStateTarget, value: string, parser: (value: string) => number) => {
-        const parsedValue = parser(value);
-        setValues(prev => ({ ...prev, [key]: parsedValue }));
+    const handleChange = (key: keyof CraneState) => (value: number) => {
+        setValues(prev => ({ ...prev, [key]: value }));
     };
 
     const handleSend = () => {
@@ -43,70 +44,62 @@ export default function MotorControls({ sendCommand, currentState }: ControlsPro
         setValues({...previousValues});
     };
 
+    const fields: FormField[] = [
+        {
+            label: 'Swing',
+            value: motors.swing,
+            onChange: handleChange('swing'),
+            type: 'range',
+            min: -180,
+            max: 180,
+            unit: '°'
+        },
+        {
+            label: 'Lift',
+            value: motors.lift,
+            onChange: handleChange('lift'),
+            type: 'range',
+            min: 0,
+            max: 3,
+            step: 0.1
+        },
+        {
+            label: 'Elbow',
+            value: motors.elbow,
+            onChange: handleChange('elbow'),
+            type: 'range',
+            min: -180,
+            max: 180,
+            unit: '°'
+        },
+        {
+            label: 'Wrist',
+            value: motors.wrist,
+            onChange: handleChange('wrist'),
+            type: 'range',
+            min: -180,
+            max: 180,
+            unit: '°'
+        },
+        {
+            label: 'Gripper',
+            value: motors.gripper,
+            onChange: handleChange('gripper'),
+            type: 'range',
+            min: 0,
+            max: 0.5
+            ,
+            step: 0.1
+        }
+    ];
+
     return (
-        <div className="motor-controls-container">
-            <h2>Motor Controls</h2>
-            <div>
-                <label>Swing: </label>
-                <input 
-                    type="range" 
-                    min="-180" 
-                    max="180" 
-                    value={motors.swing}
-                    onChange={(e) => handleChange('swing', e.target.value, parseInt)}
-                />
-                <span>{motors.swing.toFixed(1)}°</span>
-            </div>
-            <div>
-                <label>Lift: </label>
-                <input 
-                    type="range" 
-                    min="0" 
-                    max="3" 
-                    step="0.1"
-                    value={motors.lift}
-                    onChange={(e) => handleChange('lift', e.target.value, parseFloat)}
-                />
-                <span>{motors.lift.toFixed(1)}</span>
-            </div>
-            <div>
-                <label>Elbow: </label>
-                <input 
-                    type="range" 
-                    min="-180" 
-                    max="180" 
-                    value={motors.elbow}
-                    onChange={(e) => handleChange('elbow', e.target.value, parseInt)}
-                />
-                <span>{motors.elbow.toFixed(1)}°</span>
-            </div>
-            <div>
-                <label>Wrist: </label>
-                <input 
-                    type="range" 
-                    min="-180" 
-                    max="180" 
-                    value={motors.wrist}
-                    onChange={(e) => handleChange('wrist', e.target.value, parseInt)}
-                />
-                <span>{motors.wrist.toFixed(1)}°</span>
-            </div>
-            <div>
-                <label>Gripper: </label>
-                <input 
-                    type="range" 
-                    min="0" 
-                    max="1" 
-                    step="0.1"
-                    value={motors.gripper}
-                    onChange={(e) => handleChange('gripper', e.target.value, parseFloat)}
-                />
-                <span>{motors.gripper.toFixed(1)}</span>
-            </div>
-            <div style={{ marginTop: '20px' }}>
-                <button onClick={handleSend}>Send</button>
-                <button onClick={handleReset}>Reset</button>
-            </div>
-        </div>
+        <FormControls
+            title="Motor Controls"
+            fields={fields}
+            onSubmit={handleSend}
+            onReset={handleReset}
+            showReset={true}
+        />
     );
 }

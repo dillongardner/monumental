@@ -4,8 +4,8 @@ import MotorControls from "../components/MotorControls";
 import OrientationControls from "../components/OrientationControls";
 import XYZPositionControl from "../components/XYZPositionControl";
 import { useState } from "react";
-import { CraneOrientation } from "../types/crane";
-import { XYZPositionTarget, CraneStateMessage } from "../types/messages";
+import { CraneOrientation, XYZPosition } from "../types/crane";
+import { CraneStateMessage } from "../types/messages";
 
 export default function Page() {
     const { craneState, sendCommand, errorMessage } = useWebSocket();
@@ -15,13 +15,13 @@ export default function Page() {
         z: 0,
         rotationZ: 0
     });
-    const [targetPosition, setTargetPosition] = useState<XYZPositionTarget>({
+    const [targetPosition, setTargetPosition] = useState<XYZPosition>({
         x: 0,
         y: 0,
         z: 0
     });
 
-    const handleOrientationChange = (newOrientation: CraneOrientation, targetPosition: XYZPositionTarget) => {
+    const handleOrientationChange = (newOrientation: CraneOrientation, targetPosition: XYZPosition) => {
         setOrientation(newOrientation);
         sendCommand({
             type: 'xyz_position',
@@ -30,7 +30,7 @@ export default function Page() {
         });
     };
 
-    const handleXYZPositionSubmit = (position: XYZPositionTarget) => {
+    const handleXYZPositionSubmit = (position: XYZPosition) => {
         setTargetPosition(position);
         sendCommand({
             type: 'xyz_position',

@@ -1,4 +1,4 @@
-import { CraneOrientation } from './crane';
+import { CraneOrientation, XYZPosition, CraneState } from './crane';
 
 export type MessageType = 'crane_state' | 'xyz_position';
 
@@ -7,37 +7,23 @@ export interface BaseMessage {
     orientation: CraneOrientation;
 }
 
-export interface CraneStateTarget {
-    swing: number;
-    lift: number;
-    elbow: number;
-    wrist: number;
-    gripper: number;
-}
-
-export interface XYZPositionTarget {
-    x: number;
-    y: number;
-    z: number;
-}
-
 export interface CraneStateMessage extends BaseMessage {
     type: 'crane_state';
-    target: CraneStateTarget;
+    target: CraneState;
 }
 
 export interface XYZPositionMessage extends BaseMessage {
     type: 'xyz_position';
-    target: XYZPositionTarget;
+    target: XYZPosition;
 }
 
 export type WebSocketMessage = CraneStateMessage | XYZPositionMessage;
 
 export interface Response {
-    craneState?: CraneStateTarget;
-    xyzPosition?: XYZPositionTarget;
-    targetState?: CraneStateTarget;
-    targetXyzPostion?: XYZPositionTarget;
+    craneState?: CraneState;
+    xyzPosition?: XYZPosition;
+    targetState?: CraneState;
+    targetXyzPostion?: XYZPosition;
     success: boolean;
     errorMessage?: string;
 } 

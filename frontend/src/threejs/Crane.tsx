@@ -3,9 +3,8 @@ import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useControls } from "leva"; // For debugging movements
 import React from 'react';
-import { CraneOrientation, CraneState } from '../types/crane';
+import { CraneOrientation, CraneState, XYZPosition } from '../types/crane';
 import { Text } from '@react-three/drei';
-import { XYZPositionTarget } from '../types/messages';
 
 // Define the dimensions interface
 interface CraneDimensions {
@@ -95,13 +94,14 @@ interface CraneProps {
     craneState: CraneState;
     orientation: CraneOrientation;
     dimensions?: CraneDimensions;
+    targetPosition: XYZPosition | null;
 }
 
 interface SceneProps {
     craneState: CraneState;
     orientation: CraneOrientation;
     dimensions?: CraneDimensions;
-    targetPosition: XYZPositionTarget | null;
+    targetPosition: XYZPosition | null;
 }
 
 const Crane: React.FC<CraneProps> = ({ craneState, orientation, dimensions = DEFAULT_DIMENSIONS }) => {

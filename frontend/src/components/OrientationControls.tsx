@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { CraneOrientation } from '../types/crane';
-import { XYZPositionTarget } from '../types/messages';
+import { CraneOrientation, XYZPosition } from '../types/crane';
 
 interface OrientationControlsProps {
-    onOrientationChange: (orientation: CraneOrientation, targetPosition: XYZPositionTarget) => void;
-    targetPosition: XYZPositionTarget;
+    onOrientationChange: (orientation: CraneOrientation, targetPosition: XYZPosition) => void;
+    targetPosition: XYZPosition;
 }
 
 const OrientationControls: React.FC<OrientationControlsProps> = ({ onOrientationChange, targetPosition }) => {

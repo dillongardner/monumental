@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
-import { WebSocketMessage, CraneStateTarget, Response } from "../types/messages";
+import { WebSocketMessage, Response } from "../types/messages";
+import { CraneState } from "../types/crane";
 
-const DEFAULT_CRANE_STATE: CraneStateTarget = {
+const DEFAULT_CRANE_STATE: CraneState = {
     swing: 0,
     lift: 1,
     elbow: 0,
@@ -10,7 +11,7 @@ const DEFAULT_CRANE_STATE: CraneStateTarget = {
 };
 
 export default function useWebSocket() {
-    const [craneState, setCraneState] = useState<CraneStateTarget>(DEFAULT_CRANE_STATE);
+    const [craneState, setCraneState] = useState<CraneState>(DEFAULT_CRANE_STATE);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
 
@@ -30,7 +31,7 @@ export default function useWebSocket() {
                 setErrorMessage(null);
                 const newCraneState = data.craneState;
                 
-                // Validate the received data matches our CraneStateTarget type
+                // Validate the received data matches our CraneState type
                 if (
                     typeof newCraneState?.lift === 'number' &&
                     typeof newCraneState?.swing === 'number' &&

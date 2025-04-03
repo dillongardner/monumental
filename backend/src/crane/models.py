@@ -66,7 +66,7 @@ DEFAULT_CRANE = Crane(
         lift=0.2,
         elbow=10,
         wrist=10,
-        gripper=0.05,
+        gripper=0.1,
     ),
     base=Cylinder(radius=0.5, height=0.4, segment=32),
     column=Box(width=0.3, height=3, depth=0.3),
