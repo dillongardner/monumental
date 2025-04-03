@@ -20,18 +20,19 @@ export default function useWebSocket() {
             console.log("Received message:", event.data);
             try {
                 const data = JSON.parse(event.data);
+                const new_crane_state = data.craneState;
                 
                 // Validate the received data matches our CraneStateTarget type
                 if (
-                    typeof data.lift === 'number' &&
-                    typeof data.swing === 'number' &&
-                    typeof data.elbow === 'number' &&
-                    typeof data.wrist === 'number' &&
-                    typeof data.gripper === 'number'
+                    typeof new_crane_state.lift === 'number' &&
+                    typeof new_crane_state.swing === 'number' &&
+                    typeof new_crane_state.elbow === 'number' &&
+                    typeof new_crane_state.wrist === 'number' &&
+                    typeof new_crane_state.gripper === 'number'
                 ) {
-                    setCraneState(data);
+                    setCraneState(new_crane_state);
                 } else {
-                    console.error("Invalid data structure:", data);
+                    console.error("Invalid data structure:", new_crane_state);
                 }
             } catch (error) {
                 console.error("Error parsing JSON:", error);

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 from pydantic import BaseModel
 
 class CraneOrientation(BaseModel):
@@ -56,6 +57,9 @@ class Crane(BaseModel):
     lower_spacer: Cylinder
     gripper: Box
 
+
+# TODO: this should be used to initialize the frontend crane dimensions
+# This needs to be kept in sync with the Crane.tsx dimensions
 DEFAULT_CRANE = Crane(
     max_speeds=CraneSpeeds(
         swing=10,
@@ -67,9 +71,9 @@ DEFAULT_CRANE = Crane(
     base=Cylinder(radius=0.5, height=0.4, segment=32),
     column=Box(width=0.3, height=3, depth=0.3),
     upper_arm=Box(width=1, height=0.3, depth=0.2),
-    upper_spacer=Cylinder(radius=0.15, height=0.5, segment=32),
+    upper_spacer=Cylinder(radius=0.15, height=0.2, segment=32),
     lower_arm=Box(width=1, height=0.15, depth=0.15),
-    lower_spacer=Cylinder(radius=0.1, height=0.5, segment=32),
+    lower_spacer=Cylinder(radius=0.1, height=0.3, segment=32),
     gripper=Box(width=0.5, height=0.1, depth=0.1),
 )
 
@@ -92,3 +96,10 @@ class CraneStateMessage(BaseMessage):
 class XYZPositionMessage(BaseMessage):
     type: MessageType = MessageType.XYZ_POSITION
     target: XYZPosition
+
+class Response(BaseModel):
+    craneState: Optional[CraneState] = None
+    xyzPosition: Optional[XYZPosition] = None
+    targetState: Optional[CraneState] = None
+    targetXyzPostion: Optional[XYZPosition] = None
+    success: bool

@@ -30,6 +30,7 @@ const OrientationControls: React.FC<OrientationControlsProps> = ({ onOrientation
     return (
         <div className="orientation-controls">
             <h2>Crane Origin</h2>
+            <h5>When sent, will also move the crane to XYZ Position</h5>
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>
@@ -75,7 +76,7 @@ const OrientationControls: React.FC<OrientationControlsProps> = ({ onOrientation
                         />
                     </label>
                 </div>
-                <button type="submit">Update Position</button>
+                <button type="submit">Send</button>
             </form>
         </div>
     );

@@ -19,22 +19,22 @@ interface CraneDimensions {
         height: number;
         depth: number;
     };
-    elbow: {
+    upperArm: {
         width: number;
         height: number;
         depth: number;
     };
-    upperArm: {
+    upperSpacer: {
         radius: number;
         height: number;
         segments: number;
     };
-    wrist: {
+    lowerArm: {
         width: number;
         height: number;
         depth: number;
     };
-    lowerArm: {
+    lowerSpacer: {
         radius: number;
         height: number;
         segments: number;
@@ -48,6 +48,7 @@ interface CraneDimensions {
 
 // Default dimensions
 // TODO these should be received from the backend
+// This needs to be kept in sync with the DEFAULT_CRANE in backend/src/crane/models.py
 const DEFAULT_DIMENSIONS: CraneDimensions = {
     base: {
         radius: 0.5,
@@ -59,24 +60,24 @@ const DEFAULT_DIMENSIONS: CraneDimensions = {
         height: 3,
         depth: 0.3
     },
-    elbow: {
+    upperArm: {
         width: 1,
         height: 0.3,
         depth: 0.2
     },
-    upperArm: {
+    upperSpacer: {
         radius: 0.15,
-        height: 0.5,
+        height: 0.2,
         segments: 32
     },
-    wrist: {
+    lowerArm: {
         width: 1,
         height: 0.15,
         depth: 0.15
     },
-    lowerArm: {
+    lowerSpacer: {
         radius: 0.1,
-        height: 0.5,
+        height: 0.3,
         segments: 32
     },
     gripper: {
@@ -124,35 +125,35 @@ const Crane: React.FC<CraneProps> = ({ craneState, orientation, dimensions = DEF
 
                 {/* Elbow - fixed position */}
                 <group position={[0, lift, 0]}>
-                    <mesh position={[dimensions.elbow.width / 2, 0, 0]}>
-                        <boxGeometry args={[dimensions.elbow.width, dimensions.elbow.height, dimensions.elbow.depth]} />
+                    <mesh position={[dimensions.upperArm.width / 2, 0, 0]}>
+                        <boxGeometry args={[dimensions.upperArm.width, dimensions.upperArm.height, dimensions.upperArm.depth]} />
                         <meshStandardMaterial color="blue" />
                     </mesh>
 
                     {/* Upper Arm - connects elbow to wrist */}
-                    <mesh position={[dimensions.elbow.width, -dimensions.upperArm.height/2, 0]}>
-                        <cylinderGeometry args={[dimensions.upperArm.radius, dimensions.upperArm.radius, dimensions.upperArm.height, dimensions.upperArm.segments]} />
+                    <mesh position={[dimensions.upperArm.width, -dimensions.upperSpacer.height/2, 0]}>
+                        <cylinderGeometry args={[dimensions.upperSpacer.radius, dimensions.upperSpacer.radius, dimensions.upperSpacer.height, dimensions.upperSpacer.segments]} />
                         <meshStandardMaterial color="green" />
                     </mesh>
 
                     {/* Wrist - now rotates around its own axis */}
                     <group 
-                        position={[dimensions.elbow.width, -dimensions.upperArm.height, 0]}  // Position at the end of the upper arm
+                        position={[dimensions.upperArm.width, -dimensions.upperSpacer.height, 0]}  // Position at the end of the upper arm
                         rotation={[0, elbow * (Math.PI / 180), 0]}
                     >
                         
-                            <mesh position={[dimensions.wrist.width / 2, 0, 0]}>
-                                <boxGeometry args={[dimensions.wrist.width, dimensions.wrist.height, dimensions.wrist.depth]} />
+                            <mesh position={[dimensions.lowerArm.width / 2, 0, 0]}>
+                                <boxGeometry args={[dimensions.lowerArm.width, dimensions.lowerArm.height, dimensions.lowerArm.depth]} />
                                 <meshStandardMaterial color="red" />
                             </mesh>
 
                             {/* Hand */}
-                            <mesh position={[dimensions.wrist.width , -dimensions.lowerArm.height/2, 0]}>
-                                <cylinderGeometry args={[dimensions.lowerArm.radius, dimensions.lowerArm.radius, dimensions.lowerArm.height, dimensions.lowerArm.segments]} />
+                            <mesh position={[dimensions.lowerArm.width , -dimensions.lowerSpacer.height/2, 0]}>
+                                <cylinderGeometry args={[dimensions.lowerSpacer.radius, dimensions.lowerSpacer.radius, dimensions.lowerSpacer.height, dimensions.lowerSpacer.segments]} />
                                 <meshStandardMaterial color="lightgray" />
                             </mesh>
                             {/* Wrist rotation */}
-                            <group position={[dimensions.wrist.width, -dimensions.lowerArm.height, 0]}
+                            <group position={[dimensions.lowerArm.width, -dimensions.lowerSpacer.height, 0]}
                             rotation={[0, wrist * (Math.PI / 180), 0]}>
                                 {/* Gripper */}
                                 <mesh position={[0, 0 , 0]}>

@@ -1,4 +1,5 @@
 import asyncio
+from crane.crane_service import CraneService
 from crane.models import CraneState, Crane
 from typing import Callable, Awaitable, Optional
 
@@ -21,10 +22,10 @@ class MotionController:
         max_duration: float = 30.0,
         on_update: Optional[Callable[[CraneState], Awaitable[None]]] = None,
     ):
-        # """Internal method to execute the motion asynchronously."""
-        # if not self.crane.is_valid_state(target_state):
-        #     logger.error("Invalid target state")
-        #     return
+        """Internal method to execute the motion asynchronously."""
+        if not CraneService.is_valid_state(target_state, self.crane):
+            logger.error("Invalid target state")
+            return
 
         start_time = asyncio.get_event_loop().time()
 

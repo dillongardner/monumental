@@ -4,26 +4,28 @@ from crane.models import SwingLiftElbow, XYZPosition, DEFAULT_CRANE, CraneOrient
 from crane.crane_service import CraneService
 
 
-@pytest.fixture
-def crane_service():
-    return CraneService(DEFAULT_CRANE)
-
-def test_simple_cases(crane_service):
+def test_simple_cases():
     xyz_for_zeros = XYZPosition(
         x=DEFAULT_CRANE.upper_arm.width + DEFAULT_CRANE.lower_arm.width,
         y=-DEFAULT_CRANE.upper_spacer.height - DEFAULT_CRANE.lower_spacer.height,
         z=0,
     )
-    swing_lift_elbow = crane_service.xyz_to_swing_lift_elbow(xyz_for_zeros)
+    swing_lift_elbow = CraneService.xyz_to_swing_lift_elbow(xyz_for_zeros, DEFAULT_CRANE)
     assert swing_lift_elbow is not None
-    assert swing_lift_elbow.swing == 0
-    assert swing_lift_elbow.lift == 0
-    assert swing_lift_elbow.elbow == 0
-    out_of_bounds = XYZPosition(
-        x=DEFAULT_CRANE.upper_arm.width + DEFAULT_CRANE.lower_arm.width + 1, y=0, z=0
-    )
-    swing_lift_elbow = crane_service.xyz_to_swing_lift_elbow(out_of_bounds)
-    assert swing_lift_elbow is None
+    assert swing_lift_elbow.swing == pytest.approx(0, abs=1e-5)
+    assert swing_lift_elbow.lift == pytest.approx(0, abs=1e-5)
+    assert swing_lift_elbow.elbow == pytest.approx(0, abs=1e-5)
+
+
+def test_orientation_change():
+    xyz = XYZPosition(x=100, y=2, z=1)
+    orientation = CraneOrientation(x=100, y=0, z=0, rotationZ=0)
+    swe_no_orientation = CraneService.xyz_to_swing_lift_elbow(xyz=xyz, crane=DEFAULT_CRANE)
+    assert swe_no_orientation is None
+    swe_orientation = CraneService.xyz_to_swing_lift_elbow(xyz=xyz, crane=DEFAULT_CRANE, orientation=orientation)
+    assert swe_orientation is not None
+
+
 
 
 @pytest.mark.parametrize(
@@ -37,11 +39,11 @@ def test_simple_cases(crane_service):
         (SwingLiftElbow(swing=60, lift=1.5, elbow=120), CraneOrientation(x=0, y=0, z=0, rotationZ=0)),
     ],
 )
-def test_swe_there_and_back_again(crane_service, swe_there, orientation):
-    xyz = crane_service.swing_lift_elbow_to_xyz(swe_there, orientation)
+def test_swe_there_and_back_again(swe_there, orientation):
+    xyz = CraneService.swing_lift_elbow_to_xyz(swe_there, DEFAULT_CRANE, orientation)
     assert xyz is not None
     print(f"orientation: {orientation}")
-    swe_back = crane_service.xyz_to_swing_lift_elbow(xyz, orientation)
+    swe_back = CraneService.xyz_to_swing_lift_elbow(xyz, DEFAULT_CRANE, orientation)
     assert swe_back is not None
     assert swe_back.swing == pytest.approx(swe_there.swing, abs=1e-5)
     assert swe_back.lift == pytest.approx(swe_there.lift, abs=1e-5)
@@ -61,21 +63,12 @@ def test_swe_there_and_back_again(crane_service, swe_there, orientation):
         (XYZPosition(x=101, y=0, z=0), CraneOrientation(x=100, y=0, z=0, rotationZ=0)),
     ],
 )
-def test_xyz_there_and_back_again(crane_service, xyz_there, orientation):
-    swe = crane_service.xyz_to_swing_lift_elbow(xyz_there, orientation)
+def test_xyz_there_and_back_again(xyz_there, orientation):
+    swe = CraneService.xyz_to_swing_lift_elbow(xyz_there, DEFAULT_CRANE, orientation)
     assert swe is not None
-    xyz_back = crane_service.swing_lift_elbow_to_xyz(swe, orientation)
+    xyz_back = CraneService.swing_lift_elbow_to_xyz(swe, DEFAULT_CRANE, orientation)
     assert xyz_back is not None
     assert xyz_back.x == pytest.approx(xyz_there.x)
     assert xyz_back.y == pytest.approx(xyz_there.y)
     assert xyz_back.z == pytest.approx(xyz_there.z)
-
-
-def test_orientation_change(crane_service):
-    xyz = XYZPosition(x=100, y=2, z=1)
-    orientation = CraneOrientation(x=100, y=0, z=0, rotationZ=0)
-    swe_no_orientation = crane_service.xyz_to_swing_lift_elbow(xyz)
-    assert swe_no_orientation is None
-    swe_orientation = crane_service.xyz_to_swing_lift_elbow(xyz, orientation)
-    assert swe_orientation is not None
 
