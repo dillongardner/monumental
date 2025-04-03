@@ -155,7 +155,7 @@ const Crane: React.FC<CraneProps> = ({ craneState, orientation, dimensions = DEF
                             <group position={[dimensions.wrist.width, -dimensions.lowerArm.height, 0]}
                             rotation={[0, wrist * (Math.PI / 180), 0]}>
                                 {/* Gripper */}
-                                <mesh position={[dimensions.lowerArm.radius + gripper/2, 0 , 0]}>
+                                <mesh position={[0, 0 , 0]}>
                                     <boxGeometry args={[dimensions.gripper.width + gripper, dimensions.gripper.height, dimensions.gripper.depth]} />
                                     <meshStandardMaterial color="yellow" />
                                 </mesh>
