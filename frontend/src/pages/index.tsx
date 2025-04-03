@@ -15,17 +15,19 @@ export default function Page() {
         z: 0,
         rotationZ: 0
     });
-    const [targetPosition, setTargetPosition] = useState<XYZPositionTarget | null>(null);
+    const [targetPosition, setTargetPosition] = useState<XYZPositionTarget>({
+        x: 0,
+        y: 0,
+        z: 0
+    });
 
-    const handleOrientationChange = (newOrientation: CraneOrientation, currentTargetPosition: XYZPositionTarget | null) => {
+    const handleOrientationChange = (newOrientation: CraneOrientation, targetPosition: XYZPositionTarget) => {
         setOrientation(newOrientation);
-        if (currentTargetPosition) {
-            sendCommand({
-                type: 'xyz_position',
-                target: currentTargetPosition,
-                orientation: newOrientation
-            });
-        }
+        sendCommand({
+            type: 'xyz_position',
+            target: targetPosition,
+            orientation: newOrientation
+        });
     };
 
     const handleXYZPositionSubmit = (position: XYZPositionTarget) => {
@@ -54,7 +56,7 @@ export default function Page() {
                 </div>
             )}
             <div style={{ display: 'flex', gap: '20px' }}>
-                <MotorControls sendCommand={handleControlsSubmit} />
+                <MotorControls sendCommand={handleControlsSubmit} currentState={craneState} />
                 <XYZPositionControl onPositionSubmit={handleXYZPositionSubmit} />
                 <OrientationControls 
                     onOrientationChange={handleOrientationChange} 

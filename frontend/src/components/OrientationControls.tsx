@@ -3,8 +3,8 @@ import { CraneOrientation } from '../types/crane';
 import { XYZPositionTarget } from '../types/messages';
 
 interface OrientationControlsProps {
-    onOrientationChange: (orientation: CraneOrientation, targetPosition: XYZPositionTarget | null) => void;
-    targetPosition: XYZPositionTarget | null;
+    onOrientationChange: (orientation: CraneOrientation, targetPosition: XYZPositionTarget) => void;
+    targetPosition: XYZPositionTarget;
 }
 
 const OrientationControls: React.FC<OrientationControlsProps> = ({ onOrientationChange, targetPosition }) => {

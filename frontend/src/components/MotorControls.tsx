@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CraneStateMessage, CraneStateTarget } from '../types/messages';
 
 interface ControlsProps {
     sendCommand: (message: CraneStateMessage) => void;
+    currentState?: CraneStateTarget;
 }
 
-export default function MotorControls({ sendCommand }: ControlsProps) {
+export default function MotorControls({ sendCommand, currentState }: ControlsProps) {
     const [motors, setValues] = React.useState<CraneStateTarget>({
         swing: 0,
         lift: 1,
@@ -16,6 +17,13 @@ export default function MotorControls({ sendCommand }: ControlsProps) {
     
     // Keep track of previous state for reset functionality
     const [previousValues, setPreviousValues] = React.useState<CraneStateTarget>({...motors});
+
+    // Update motors when currentState changes
+    useEffect(() => {
+        if (currentState) {
+            setValues(currentState);
+        }
+    }, [currentState]);
 
     const handleChange = (key: keyof CraneStateTarget, value: string, parser: (value: string) => number) => {
         const parsedValue = parser(value);
@@ -47,7 +55,7 @@ export default function MotorControls({ sendCommand }: ControlsProps) {
                     value={motors.swing}
                     onChange={(e) => handleChange('swing', e.target.value, parseInt)}
                 />
-                <span>{motors.swing}°</span>
+                <span>{motors.swing.toFixed(1)}°</span>
             </div>
             <div>
                 <label>Lift: </label>
@@ -59,7 +67,7 @@ export default function MotorControls({ sendCommand }: ControlsProps) {
                     value={motors.lift}
                     onChange={(e) => handleChange('lift', e.target.value, parseFloat)}
                 />
-                <span>{motors.lift}</span>
+                <span>{motors.lift.toFixed(1)}</span>
             </div>
             <div>
                 <label>Elbow: </label>
@@ -70,7 +78,7 @@ export default function MotorControls({ sendCommand }: ControlsProps) {
                     value={motors.elbow}
                     onChange={(e) => handleChange('elbow', e.target.value, parseInt)}
                 />
-                <span>{motors.elbow}°</span>
+                <span>{motors.elbow.toFixed(1)}°</span>
             </div>
             <div>
                 <label>Wrist: </label>
@@ -81,7 +89,7 @@ export default function MotorControls({ sendCommand }: ControlsProps) {
                     value={motors.wrist}
                     onChange={(e) => handleChange('wrist', e.target.value, parseInt)}
                 />
-                <span>{motors.wrist}°</span>
+                <span>{motors.wrist.toFixed(1)}°</span>
             </div>
             <div>
                 <label>Gripper: </label>
@@ -93,7 +101,7 @@ export default function MotorControls({ sendCommand }: ControlsProps) {
                     value={motors.gripper}
                     onChange={(e) => handleChange('gripper', e.target.value, parseFloat)}
                 />
-                <span>{motors.gripper}</span>
+                <span>{motors.gripper.toFixed(1)}</span>
             </div>
             <div style={{ marginTop: '20px' }}>
                 <button onClick={handleSend}>Send</button>

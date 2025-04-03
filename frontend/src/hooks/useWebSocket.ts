@@ -28,19 +28,19 @@ export default function useWebSocket() {
                 }
                 
                 setErrorMessage(null);
-                const new_crane_state = data.craneState;
+                const newCraneState = data.craneState;
                 
                 // Validate the received data matches our CraneStateTarget type
                 if (
-                    typeof new_crane_state?.lift === 'number' &&
-                    typeof new_crane_state?.swing === 'number' &&
-                    typeof new_crane_state?.elbow === 'number' &&
-                    typeof new_crane_state?.wrist === 'number' &&
-                    typeof new_crane_state?.gripper === 'number'
+                    typeof newCraneState?.lift === 'number' &&
+                    typeof newCraneState?.swing === 'number' &&
+                    typeof newCraneState?.elbow === 'number' &&
+                    typeof newCraneState?.wrist === 'number' &&
+                    typeof newCraneState?.gripper === 'number'
                 ) {
-                    setCraneState(new_crane_state);
+                    setCraneState(newCraneState);
                 } else {
-                    console.error("Invalid data structure:", new_crane_state);
+                    console.error("Invalid data structure:", newCraneState);
                 }
             } catch (error) {
                 console.error("Error parsing JSON:", error);
