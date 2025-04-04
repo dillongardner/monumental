@@ -2,11 +2,12 @@ from enum import Enum
 from typing import Optional
 from pydantic import BaseModel
 
+
 class CraneOrientation(BaseModel):
     x: float = 0
-    y: float = 0 
+    y: float = 0
     z: float = 0
-    rotationZ: float = 0 # in degrees
+    rotationZ: float = 0  # in degrees
 
 
 class SwingLiftElbow(BaseModel):
@@ -20,7 +21,7 @@ class CraneMotors(SwingLiftElbow):
     gripper: float
 
 
-class CraneSpeeds(CraneMotors): 
+class CraneSpeeds(CraneMotors):
     pass
 
 
@@ -78,12 +79,12 @@ DEFAULT_CRANE = Crane(
 )
 
 
-class MessageType(str,Enum):
+class MessageType(str, Enum):
     CRANE_STATE = "crane_state"
     XYZ_POSITION = "xyz_position"
 
 
-class Status(str,Enum):
+class Status(str, Enum):
     MOVING = "moving"
     STOPPED = "stopped"
     ERROR = "error"
@@ -108,5 +109,5 @@ class Response(BaseModel):
     craneState: Optional[CraneState] = None
     xyzPosition: Optional[XYZPosition] = None
     errorMessage: Optional[str] = None
-    status: Status 
+    status: Status
     success: bool

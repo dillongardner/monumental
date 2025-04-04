@@ -7,5 +7,14 @@ services:
       - "3000:3000"  
     environment:
       - NODE_ENV=production
-    # volumes:
-      # - ./frontend:/app  # Useful to speed up development
+
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped

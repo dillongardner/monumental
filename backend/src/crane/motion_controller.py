@@ -35,7 +35,7 @@ class MotionController:
 
             async with self._motion_lock:
                 for field in self.crane.max_speeds.model_fields.keys():
-                    step = getattr(self.crane.max_speeds, field) * time_diff  
+                    step = getattr(self.crane.max_speeds, field) * time_diff
                     current = getattr(self.state, field)
                     target = getattr(target_state, field)
 
@@ -79,4 +79,3 @@ class MotionController:
             self._execute_motion(target_state, max_duration)
         )
         return self._current_task
-

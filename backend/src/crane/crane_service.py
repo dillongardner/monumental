@@ -2,7 +2,14 @@ import math
 from typing import Optional
 import logging
 import numpy as np
-from crane.models import CraneOrientation, XYZPosition, SwingLiftElbow, CraneState, Crane, DEFAULT_CRANE
+from crane.models import (
+    CraneOrientation,
+    XYZPosition,
+    SwingLiftElbow,
+    CraneState,
+    Crane,
+    DEFAULT_CRANE,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -12,32 +19,46 @@ class CraneService:
     def is_valid_state(state: CraneState, crane: Optional[Crane] = None) -> bool:
         # TODO: Add real check to see if state is valid for crane
         return True
-    
+
     @staticmethod
     def orientation_to_matrix(orientation: CraneOrientation) -> np.ndarray:
         theta = orientation.rotationZ * np.pi / 180
-        return np.array([
-            [np.cos(theta), -np.sin(theta), 0, orientation.x],
-            [np.sin(theta), np.cos(theta), 0, orientation.y],
-            [0, 0, 1, orientation.z],
-            [0, 0, 0, 1]
-        ])
-    
+        return np.array(
+            [
+                [np.cos(theta), -np.sin(theta), 0, orientation.x],
+                [np.sin(theta), np.cos(theta), 0, orientation.y],
+                [0, 0, 1, orientation.z],
+                [0, 0, 0, 1],
+            ]
+        )
+
     @staticmethod
     def orientation_to_inverse_matrix(orientation: CraneOrientation) -> np.ndarray:
         theta = orientation.rotationZ * np.pi / 180
-        return np.array([
-            [np.cos(theta), np.sin(theta), 0, -orientation.x * np.cos(theta) - orientation.y * np.sin(theta)],
-            [-np.sin(theta), np.cos(theta), 0, orientation.x * np.sin(theta) - orientation.y * np.cos(theta)],
-            [0, 0, 1, -orientation.z],
-            [0, 0, 0, 1] 
-        ])
+        return np.array(
+            [
+                [
+                    np.cos(theta),
+                    np.sin(theta),
+                    0,
+                    -orientation.x * np.cos(theta) - orientation.y * np.sin(theta),
+                ],
+                [
+                    -np.sin(theta),
+                    np.cos(theta),
+                    0,
+                    orientation.x * np.sin(theta) - orientation.y * np.cos(theta),
+                ],
+                [0, 0, 1, -orientation.z],
+                [0, 0, 0, 1],
+            ]
+        )
 
     @staticmethod
     def xyz_to_swing_lift_elbow(
-        xyz: XYZPosition, 
+        xyz: XYZPosition,
         crane: Optional[Crane] = None,
-        orientation: Optional[CraneOrientation] = None
+        orientation: Optional[CraneOrientation] = None,
     ) -> Optional[SwingLiftElbow]:
         """
         Convert an xyz position to the necessary lift, swing, and elbow
@@ -56,7 +77,10 @@ class CraneService:
             xyz_arr = matrix @ xyz_arr
             xyz = XYZPosition(x=xyz_arr[0], y=xyz_arr[1], z=xyz_arr[2])
         try:
-            if xyz.x**2 + xyz.z**2 > (crane.upper_arm.width + crane.lower_arm.width) ** 2:
+            if (
+                xyz.x**2 + xyz.z**2
+                > (crane.upper_arm.width + crane.lower_arm.width) ** 2
+            ):
                 logger.warning("Target is out of reach")
                 return None
             lift = xyz.y + crane.upper_spacer.height + crane.lower_spacer.height
@@ -85,11 +109,12 @@ class CraneService:
 
     @staticmethod
     def swing_lift_elbow_to_xyz(
-        state: SwingLiftElbow, 
+        state: SwingLiftElbow,
         crane: Optional[Crane] = None,
-        orientation: Optional[CraneOrientation] = None
+        orientation: Optional[CraneOrientation] = None,
     ) -> XYZPosition:
         crane = crane or DEFAULT_CRANE
+
         def cos(angle_degrees: float) -> float:
             return np.cos(angle_degrees * np.pi / 180)
 
@@ -154,13 +179,13 @@ class CraneService:
         return XYZPosition(
             x=full_matrix[0, -1], y=full_matrix[1, -1], z=full_matrix[2, -1]
         )
-    
+
     @staticmethod
     def xyz_to_crane_state(
-        xyz: XYZPosition, 
-        current_state: CraneState, 
+        xyz: XYZPosition,
+        current_state: CraneState,
         orientation: CraneOrientation,
-        crane: Optional[Crane] = None
+        crane: Optional[Crane] = None,
     ) -> Optional[CraneState]:
         swing_lift_elbow = CraneService.xyz_to_swing_lift_elbow(xyz, crane, orientation)
         if swing_lift_elbow is None:
@@ -170,6 +195,5 @@ class CraneService:
             lift=swing_lift_elbow.lift,
             elbow=swing_lift_elbow.elbow,
             wrist=current_state.wrist,
-            gripper=current_state.gripper
+            gripper=current_state.gripper,
         )
-
