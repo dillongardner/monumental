@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
-import { CraneStateMessage } from '../types/messages';
+import { CraneStateMessage, Status } from '../types/messages';
 import { CraneState } from '../types/crane';
 import FormControls, { FormField } from './FormControls';
 
 interface ControlsProps {
     sendCommand: (message: CraneStateMessage) => void;
     currentState?: CraneState;
+    status?: Status;
 }
 
-export default function MotorControls({ sendCommand, currentState }: ControlsProps) {
+export default function MotorControls({ sendCommand, currentState, status }: ControlsProps) {
     const [motors, setValues] = React.useState<CraneState>({
         swing: 0,
         lift: 1,
@@ -20,12 +21,12 @@ export default function MotorControls({ sendCommand, currentState }: ControlsPro
     // Keep track of previous state for reset functionality
     const [previousValues, setPreviousValues] = React.useState<CraneState>({...motors});
 
-    // Update motors when currentState changes
+    // Update motors when currentState changes and status is Moving
     useEffect(() => {
-        if (currentState) {
+        if (currentState && status === Status.MOVING) {
             setValues(currentState);
         }
-    }, [currentState]);
+    }, [currentState, status]);
 
     const handleChange = (key: keyof CraneState) => (value: number) => {
         setValues(prev => ({ ...prev, [key]: value }));

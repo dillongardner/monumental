@@ -1,6 +1,11 @@
 import { CraneOrientation, XYZPosition, CraneState } from './crane';
 
 export type MessageType = 'crane_state' | 'xyz_position';
+export enum Status {
+    MOVING = 'moving',
+    STOPPED = 'stopped',
+    ERROR = 'error'
+}
 
 export interface BaseMessage {
     type: MessageType;
@@ -24,6 +29,6 @@ export interface Response {
     xyzPosition?: XYZPosition;
     targetState?: CraneState;
     targetXyzPostion?: XYZPosition;
-    success: boolean;
+    status: Status;
     errorMessage?: string;
 } 

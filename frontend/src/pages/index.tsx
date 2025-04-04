@@ -5,10 +5,10 @@ import OrientationControls from "../components/OrientationControls";
 import XYZPositionControl from "../components/XYZPositionControl";
 import { useState } from "react";
 import { CraneOrientation, XYZPosition } from "../types/crane";
-import { CraneStateMessage } from "../types/messages";
+import { CraneStateMessage, Status } from "../types/messages";
 
 export default function Page() {
-    const { craneState, sendCommand, errorMessage } = useWebSocket();
+    const { craneState, sendCommand, errorMessage, status } = useWebSocket();
     const [orientation, setOrientation] = useState<CraneOrientation>({
         x: 0,
         y: 0,
@@ -56,7 +56,11 @@ export default function Page() {
                 </div>
             )}
             <div style={{ display: 'flex', gap: '20px' }}>
-                <MotorControls sendCommand={handleControlsSubmit} currentState={craneState} />
+                <MotorControls 
+                    sendCommand={handleControlsSubmit} 
+                    currentState={craneState} 
+                    status={status}
+                />
                 <XYZPositionControl onPositionSubmit={handleXYZPositionSubmit} />
                 <OrientationControls 
                     onOrientationChange={handleOrientationChange} 

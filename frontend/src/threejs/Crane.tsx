@@ -104,7 +104,7 @@ interface SceneProps {
     targetPosition: XYZPosition | null;
 }
 
-const Crane: React.FC<CraneProps> = ({ craneState, orientation, dimensions = DEFAULT_DIMENSIONS }) => {
+const Crane: React.FC<CraneProps> = ({ craneState, orientation, dimensions = DEFAULT_DIMENSIONS, targetPosition }) => {
     // Destructure values from craneState, providing default values if craneState is null
     const { swing, lift, elbow, wrist, gripper} = craneState;
 
@@ -227,6 +227,7 @@ export default function Scene({ craneState, orientation, dimensions, targetPosit
                     craneState={craneState} 
                     orientation={orientation} 
                     dimensions={dimensions}
+                    targetPosition={targetPosition}
                 />
             </Canvas>
         </div>

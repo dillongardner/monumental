@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { WebSocketMessage, Response } from "../types/messages";
+import { WebSocketMessage, Response, Status } from "../types/messages";
 import { CraneState } from "../types/crane";
 
 const DEFAULT_CRANE_STATE: CraneState = {
@@ -13,6 +13,7 @@ const DEFAULT_CRANE_STATE: CraneState = {
 export default function useWebSocket() {
     const [craneState, setCraneState] = useState<CraneState>(DEFAULT_CRANE_STATE);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [status, setStatus] = useState<Status>(Status.STOPPED);
     const wsRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
@@ -23,12 +24,13 @@ export default function useWebSocket() {
             try {
                 const data: Response = JSON.parse(event.data);
                 
-                if (!data.success) {
+                if (data.status === Status.ERROR) {
                     setErrorMessage(data.errorMessage || "The request failed with missing message");
                     return;
                 }
                 
                 setErrorMessage(null);
+                setStatus(data.status);
                 const newCraneState = data.craneState;
                 
                 // Validate the received data matches our CraneState type
@@ -61,5 +63,5 @@ export default function useWebSocket() {
         }
     };
 
-    return { craneState, sendCommand, errorMessage };
+    return { craneState, sendCommand, errorMessage, status };
 }

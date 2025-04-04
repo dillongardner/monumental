@@ -78,9 +78,15 @@ DEFAULT_CRANE = Crane(
 )
 
 
-class MessageType(str, Enum):
+class MessageType(str,Enum):
     CRANE_STATE = "crane_state"
     XYZ_POSITION = "xyz_position"
+
+
+class Status(str,Enum):
+    MOVING = "moving"
+    STOPPED = "stopped"
+    ERROR = "error"
 
 
 class BaseMessage(BaseModel):
@@ -97,10 +103,10 @@ class XYZPositionMessage(BaseMessage):
     type: MessageType = MessageType.XYZ_POSITION
     target: XYZPosition
 
+
 class Response(BaseModel):
     craneState: Optional[CraneState] = None
     xyzPosition: Optional[XYZPosition] = None
-    targetState: Optional[CraneState] = None
-    targetXyzPostion: Optional[XYZPosition] = None
     errorMessage: Optional[str] = None
+    status: Status 
     success: bool

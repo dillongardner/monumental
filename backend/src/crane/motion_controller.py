@@ -1,7 +1,7 @@
 import asyncio
 from crane.crane_service import CraneService
 from crane.models import CraneState, Crane
-from typing import Callable, Awaitable, Optional
+from typing import Optional
 
 import logging
 
@@ -20,19 +20,22 @@ class MotionController:
         self,
         target_state: CraneState,
         max_duration: float = 30.0,
-        on_update: Optional[Callable[[CraneState], Awaitable[None]]] = None,
     ):
         """Internal method to execute the motion asynchronously."""
         if not CraneService.is_valid_state(target_state, self.crane):
             logger.error("Invalid target state")
             return
-
         start_time = asyncio.get_event_loop().time()
+        last_time = start_time
 
         while asyncio.get_event_loop().time() - start_time < max_duration:
+            current_time = asyncio.get_event_loop().time()
+            time_diff = current_time - last_time
+            last_time = current_time
+
             async with self._motion_lock:
                 for field in self.crane.max_speeds.model_fields.keys():
-                    step = getattr(self.crane.max_speeds, field) * self.time_step  # Adjust per tick
+                    step = getattr(self.crane.max_speeds, field) * time_diff  
                     current = getattr(self.state, field)
                     target = getattr(target_state, field)
 
@@ -48,8 +51,6 @@ class MotionController:
                     else:
                         setattr(self.state, field, target)
 
-                if on_update:
-                    await on_update(self.state)
                 # Check if we've reached the target state
                 if all(
                     getattr(self.state, field) == getattr(target_state, field)
@@ -63,7 +64,6 @@ class MotionController:
         self,
         target_state: CraneState,
         max_duration: float = 30.0,
-        on_update: Optional[Callable[[CraneState], Awaitable[None]]] = None,
     ):
         """Smoothly transitions to target state over a duration asynchronously."""
         # Cancel any ongoing motion
@@ -76,7 +76,7 @@ class MotionController:
 
         # Create and start new motion task
         self._current_task = asyncio.create_task(
-            self._execute_motion(target_state, max_duration, on_update)
+            self._execute_motion(target_state, max_duration)
         )
         return self._current_task
 
