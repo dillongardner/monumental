@@ -5,7 +5,7 @@
 Both the backend and frontend can be run through docker
 
 * Build docker images `docker compose build`
-* Run end with `docker compose up`
+* Run with `docker compose up`
 * The frontend runs on port 3000
 * The backend runs on port 8000 
 
