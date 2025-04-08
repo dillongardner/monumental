@@ -30,6 +30,11 @@ From within the `frontend` directory
 * Run with `npm start`
 
 
+### Installation script
+
+For Mac users, can set up dependencies by running the `install.sh` script
+
+
 ## Comments
 
 * Acceleration - to constrain scope a bit, I did not implement acceleration of the motors. Instead motors always move at their maximum speed. To extend the work to include acceperation, the `CraneState` would need to include velocity as well as position and the `Crane` would need to include accelerations as well as max speeds. In each update of state, the velocities would be updated based on the acceleration and the motor positions based on the current velocities.
