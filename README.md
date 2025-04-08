@@ -9,6 +9,27 @@ Both the backend and frontend can be run through docker
 * The frontend runs on port 3000
 * The backend runs on port 8000 
 
+### Running without Docker
+
+#### Backend
+
+The backend system runs on python 3.13. It is an
+
+* Create a virtualenv for python 3.13
+  * I personally use `uv`, so achieve this with `uv venv --python 3.13` from within the `backend` directory
+* With the virtualenv active, install the backend package (e.g. `uv pip install .`)
+* From within the backend directory run `uvicorn server:app --host 0.0.0.0 --port 8000 --reload`
+
+
+#### Frontend
+
+From within the `frontend` directory
+
+* Install dependencies with `npm install`
+* Build with `npm run build`
+* Run with `npm start`
+
+
 ## Comments
 
 * Acceleration - to constrain scope a bit, I did not implement acceleration of the motors. Instead motors always move at their maximum speed. To extend the work to include acceperation, the `CraneState` would need to include velocity as well as position and the `Crane` would need to include accelerations as well as max speeds. In each update of state, the velocities would be updated based on the acceleration and the motor positions based on the current velocities.
