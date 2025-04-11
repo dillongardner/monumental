@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies using uv
-RUN uv pip install -r pyproject.toml
+RUN uv sync --frozen
 RUN uv pip install .
 
 # Expose the port the app runs on
