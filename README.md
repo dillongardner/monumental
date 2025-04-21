@@ -1,5 +1,7 @@
 # Monumental Takehome
 
+A solution to a take-home from Monumental
+
 ## How to Run
 
 Both the backend and frontend can be run through docker
